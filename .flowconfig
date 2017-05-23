@@ -1,0 +1,12 @@
+[ignore]
+<PROJECT_ROOT>/node_modules/.*
+
+[include]
+
+[libs]
+
+[options]
+all=true
+module.system=haste
+module.name_mapper='^.*\.[cs]ss$' -> 'empty/object'
+suppress_comment= \\(.\\|\n\\)*\\flow-disable-next-line
