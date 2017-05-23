@@ -33,16 +33,18 @@ const markdown2json = fileName =>
       content: marked(content),
     }))
 
-function writeFile(o) {
+function writeFile({ file, data, content }) {
+  const filePieces = file
+    .split('/')
+    .filter(p => p.length > 0)
   const outputDir = path.resolve(__dirname, config.outputDir)
-  const filePieces = o.file.split(/[\\/]/).filter(p => p.length > 0)
   const filePath = path.join(outputDir, ...filePieces)
   const [_, outBase, file] = Array.from(filePath.match(/^(.+)\/([^/]+)$/))
   return mkdir(outBase)
     .then(() => {
       const fileName = path.join(outBase, file)
       const write$ = fs.createWriteStream(`${fileName}.json`)
-      const output = JSON.stringify(Object.assign({}, o.data, o.content))
+      const output = JSON.stringify(Object.assign({}, data, content))
       return write$.write(output)
     })
     .catch(console.log)
