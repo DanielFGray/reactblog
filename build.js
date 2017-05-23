@@ -8,6 +8,7 @@ const { mkdirp } = require('mkdirp')
 const { Observable } = require('rxjs')
 const Promise = require('bluebird')
 const yaml = require('js-yaml')
+const cheerio = require('cheerio')
 
 const readFile = Promise.promisify(fs.readFile)
 const mkdir = Promise.promisify(mkdirp)
@@ -33,7 +34,7 @@ const markdown2json = fileName =>
       content: marked(content),
     }))
 
-function writeFile({ file, data, content }) {
+const writeFile = ({ file, data, content }) => {
   const filePieces = file
     .split('/')
     .filter(p => p.length > 0)
@@ -50,7 +51,20 @@ function writeFile({ file, data, content }) {
     .catch(console.log)
 }
 
-Observable.from(globby(`${config.contentDir}/**/*.md`, { absolute: true }))
+const excerpt = (o) => {
+  const content = cheerio(o.content).first('p').text()
+  const x = Object.assign({}, o.data, { content })
+  return x
+}
+
+const file$ = Observable.from(globby(`${config.contentDir}/**/*.md`, { absolute: true }))
   .flatMap(x => x)
-  .flatMap(markdown2json)
+  .flatMap(x => markdown2json(x))
+
+const index = file$
+  .map(x => excerpt(x))
+  .reduce((p, c) => p.concat(c), [])
+  .map(x => ({ content: { files: x }, file: 'index' }))
+
+Observable.merge(file$, index)
   .subscribe(writeFile, console.error)
