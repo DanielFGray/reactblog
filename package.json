@@ -37,6 +37,7 @@
     "babel-preset-flow": "^6.23.0",
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-0": "^6.24.1",
+    "cheerio": "^0.22.0",
     "concurrently": "^3.4.0",
     "css-loader": "^0.28.2",
     "cssnano": "^3.10.0",
