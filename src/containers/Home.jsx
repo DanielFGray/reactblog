@@ -1,6 +1,9 @@
 // @flow
 import React, { Component } from 'react'
 import { injectState } from 'freactal'
+import { Link } from 'react-router-dom'
+
+import style from './Home.sss'
 
 class Home extends Component {
   componentDidMount() {
@@ -13,7 +16,6 @@ class Home extends Component {
     }
     return (
       <div>
-        <TagList tags={this.props.state.tags} />
         <div>
           {this.props.state.posts.map(e => <PostExcerpt key={`${e.title}${e.date}`} {...e} />)}
         </div>
@@ -22,16 +24,16 @@ class Home extends Component {
   }
 }
 
-const TagList = ({ tags }) => (
-  <ul style={{ padding: 0, margin: 0, listStyle: 'none' }}>
-    {tags.map(e => <li key={e.name} style={{ padding: '0 5px', display: 'inline-block' }}>{e.name}</li>)}
-  </ul>
+const PostTags = ({ tags }) => (
+  <span className={style.postTagList}>
+    {tags.map(e => <Link key={e} to={`/tags/${e}`}>{e}</Link>)}
+  </span>
 )
 
 const PostExcerpt = ({ title, date, tags, content }) => (
   <div style={{ padding: 0, margin: '5px' }}>
     <h3 style={{ margin: 0 }}>{title}</h3>
-    <div>{date} - [{tags.join(', ')}]</div>
+    <div>{date} - <PostTags tags={tags} /></div>
     <div>{content}</div>
   </div>
 )
