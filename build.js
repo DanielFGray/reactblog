@@ -45,7 +45,7 @@ const writeFile = ({ file, data, content }) => {
     .then(() => {
       const fileName = path.join(outBase, basename)
       const write$ = fs.createWriteStream(`${fileName}.json`)
-      const output = JSON.stringify(Object.assign({}, data, content))
+      const output = JSON.stringify({ data, content })
       return write$.write(output)
     })
     .catch(console.log)
@@ -57,14 +57,16 @@ const excerpt = (o) => {
   return x
 }
 
-const file$ = Observable.from(globby(`${config.contentDir}/**/*.md`, { absolute: true }))
+const fileGlob = globby(`${config.contentDir}/**/*.md`, { absolute: true })
+const file$ = Observable.from(fileGlob)
   .flatMap(x => x)
   .flatMap(x => markdown2json(x))
 
 const index = file$
+  .filter(x => x.data.layout === 'post')
   .map(x => excerpt(x))
   .reduce((p, c) => p.concat(c), [])
-  .map(x => ({ content: { files: x }, file: 'index' }))
+  .map(x => ({ content: { posts: x }, file: 'posts/index' }))
 
 Observable.merge(file$, index)
   .subscribe(writeFile, console.error)
