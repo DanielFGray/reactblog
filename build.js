@@ -39,10 +39,10 @@ function writeFile({ file, data, content }) {
     .filter(p => p.length > 0)
   const outputDir = path.resolve(__dirname, config.outputDir)
   const filePath = path.join(outputDir, ...filePieces)
-  const [_, outBase, file] = Array.from(filePath.match(/^(.+)\/([^/]+)$/))
+  const [_, outBase, basename] = Array.from(filePath.match(/^(.+)\/([^/]+)$/))
   return mkdir(outBase)
     .then(() => {
-      const fileName = path.join(outBase, file)
+      const fileName = path.join(outBase, basename)
       const write$ = fs.createWriteStream(`${fileName}.json`)
       const output = JSON.stringify(Object.assign({}, data, content))
       return write$.write(output)
