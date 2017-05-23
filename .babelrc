@@ -8,7 +8,9 @@
   "env": {
     "production": {
       "plugins": [
-        ["lodash", { "id": ["rxjs", "recompose", "ramda"]  }]
+        ["lodash", { "id": [
+          "lodash"
+        ]}]
       ]
     },
     "development": {
