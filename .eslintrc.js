@@ -18,5 +18,6 @@ module.exports = {
     'space-unary-ops': ['error', { words: true, nonwords: false, overrides: { '!': true } }],
     'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     'no-console': 'warn',
+    'react/prop-types': 0,
   },
 }

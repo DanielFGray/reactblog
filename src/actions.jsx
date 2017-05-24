@@ -1,5 +1,5 @@
 // @flow
-import { provideState, softUpdate } from 'freactal'
+import { provideState } from 'freactal'
 import { get } from 'axios'
 import {
   countBy,
@@ -22,23 +22,31 @@ const wrapWithPending = (pendingKey, cb) => effects =>
 
 const Provider = provideState({
   initialState: () => ({
-    posts: [],
+    post: {},
     postsPending: false,
+    excerpts: [],
+    excerptsPending: false,
   }),
   effects: {
-    setFlag: softUpdate((state, key, value) => ({ [key]: value })),
-    getPosts: wrapWithPending('postsPending', () => get('/api/posts/index.json')
-      .then(res => res.data.content.posts)
-      .then(pipe(sortBy('date'), reverse))
-      .then(posts => state => ({ ...state, posts }))),
+    setFlag: (effects, key, value) => state => ({ ...state, [key]: value }),
+    getPost: (effects, file) => effects.setFlag('postPending', true)
+      .then(() => get(`/api/posts/${file}.json`))
+      .then(res => res.data)
+      .then(post => effects.setFlag('postPending', false).then(() => post))
+      .then(post => state => ({ ...state, post })),
+    getPosts: wrapWithPending('excerptsPending', () =>
+      get('/api/posts/index.json')
+        .then(res => res.data.content.posts)
+        .then(pipe(sortBy('date'), reverse))
+        .then(excerpts => state => ({ ...state, excerpts }))),
   },
   computed: {
-    categories: ({ posts }) => (
+    categories: ({ excerpts }) => (
       pipe(
         pluck('category'),
         uniq,
-      )(posts)),
-    tags: ({ posts }) => (
+      )(excerpts)),
+    tags: ({ excerpts }) => (
       pipe(
         pluck('tags'),
         flatten,
@@ -47,7 +55,7 @@ const Provider = provideState({
         map(zipObj(['name', 'value'])),
         sortBy('value'),
         reverse,
-      )(posts)),
+      )(excerpts)),
   },
 })
 

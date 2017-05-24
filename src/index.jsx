@@ -10,6 +10,9 @@ import './style.sss'
 
 import Home from './containers/Home'
 import Nav from './components/Nav'
+import Post from './containers/Post'
+import Categories from './containers/Categories'
+import Tags from './containers/Tags'
 
 import { Provider } from './actions'
 
@@ -17,11 +20,11 @@ const App = Provider(() => (
   <Router>
     <div>
       <Nav />
-      <Route exact path="/" component={Home} />
-      <Route exact path="/tags" component={Home} />
-      <Route exact path="/tags/:tag" component={Home} />
-      <Route exact path="/:category" component={Home} />
-      <Route exact path="/:category/:title" component={Home} />
+      <Route path="/" exact component={Home} />
+      <Route path="/tags" exact component={Home} />
+      <Route path="/tags/:tag" component={Tags} />
+      <Route path="/:category" exact component={Categories} />
+      <Route path="/:category/:title" component={Post} />
     </div>
   </Router>
 ))

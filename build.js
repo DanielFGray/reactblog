@@ -23,39 +23,43 @@ marked.setOptions({
 })
 
 const base = path.resolve(__dirname, config.contentDir)
+const merge = (...a) => Object.assign({}, ...a)
 
 const markdown2json = fileName =>
   Observable.from(readFile(fileName))
     .map(x => x.toString())
     .map(x => matter(x))
-    .map(({ data, content }) => ({
+    .map(({ data, content }) => merge(data, {
       file: fileName.replace(new RegExp(`^${base}(.*).md$`), '$1'),
-      data,
       content: marked(content),
     }))
+    .map(x => merge(x, {
+      date: (new Date(x.date)).getTime(),
+    }))
 
-const writeFile = ({ file, data, content }) => {
-  const filePieces = file
+const writeFile = (o) => {
+  const filePieces = o.file
     .split('/')
     .filter(p => p.length > 0)
   const outputDir = path.resolve(__dirname, config.outputDir)
   const filePath = path.join(outputDir, ...filePieces)
+  // flow-disable-next-line
   const [_, outBase, basename] = Array.from(filePath.match(/^(.+)\/([^/]+)$/))
   return mkdir(outBase)
     .then(() => {
       const fileName = path.join(outBase, basename)
       const write$ = fs.createWriteStream(`${fileName}.json`)
-      const output = JSON.stringify({ data, content })
+      const output = JSON.stringify(merge(o, { file: basename }))
       return write$.write(output)
     })
     .catch(console.log)
 }
 
-const excerpt = (o) => {
-  const content = cheerio(o.content).first('p').text()
-  const x = Object.assign({}, o.data, { content })
-  return x
-}
+const excerpt = o =>
+  merge(o, {
+    content: cheerio(o.content).first('p').text(),
+    file: o.file.split('/').slice(-1)[0],
+  })
 
 const fileGlob = globby(`${config.contentDir}/**/*.md`, { absolute: true })
 const file$ = Observable.from(fileGlob)
@@ -63,7 +67,7 @@ const file$ = Observable.from(fileGlob)
   .flatMap(x => markdown2json(x))
 
 const index = file$
-  .filter(x => x.data.layout === 'post')
+  .filter(x => x.layout === 'post')
   .map(x => excerpt(x))
   .reduce((p, c) => p.concat(c), [])
   .map(x => ({ content: { posts: x }, file: 'posts/index' }))

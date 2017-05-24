@@ -69,6 +69,7 @@ module.exports = {
     contentBase: path.resolve(__dirname, 'public'),
     publicPath: '/',
     stats,
+    historyApiFallback: true,
   },
   stats,
 }
