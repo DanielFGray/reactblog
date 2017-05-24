@@ -14,6 +14,14 @@ class PostView extends Component {
   }
 
   componentDidMount() {
+    this.getPost()
+  }
+
+  componentWillReceiveProps() {
+    this.getPost()
+  }
+
+  getPost = () => {
     const { match } = this.props
     const file = match.params.title
     get(`/api/posts/${file}.json`)
