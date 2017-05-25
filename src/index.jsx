@@ -51,8 +51,8 @@ const App = Provider(injectState(
                   <Route path="/:category" exact component={Categories} />
                   <Route path="/:category/:title" component={Post} />
                 </Switch>
-              </RouteTransition>
-            )} />
+              </RouteTransition>)}
+            />
           </div>
         </Router>
       )
