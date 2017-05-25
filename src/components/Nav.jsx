@@ -1,19 +1,19 @@
 // @flow
 import React from 'react'
 import { injectState } from 'freactal'
-import { Link } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 
 import style from './Nav.sss'
 
 const TagList = ({ categories }: { categories: Array<string> }) => (
   categories.length
   ? <ul className={style.nav}>
-    <li><Link to="/">home</Link></li>
+    <li><NavLink to="/" exact activeClassName={style.activeLinkStyle}>home</NavLink></li>
     {categories.map(e => (
       <li key={e}>
-        <Link to={`/${e}`}>
+        <NavLink to={`/${e}`} activeClassName={style.activeLinkStyle}>
           {e}
-        </Link>
+        </NavLink>
       </li>))}
   </ul>
   : null
