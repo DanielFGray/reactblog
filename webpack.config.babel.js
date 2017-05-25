@@ -70,6 +70,7 @@ module.exports = {
     publicPath: '/',
     stats,
     historyApiFallback: true,
+    disableHostCheck: true,
   },
   stats,
 }
