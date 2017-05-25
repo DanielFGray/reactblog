@@ -4,7 +4,9 @@ import { render } from 'react-dom'
 import {
   BrowserRouter as Router,
   Route,
+  Switch,
 } from 'react-router-dom'
+import { RouteTransition } from 'react-router-transition'
 import { injectState } from 'freactal'
 
 import './style.sss'
@@ -35,11 +37,22 @@ const App = Provider(injectState(
         <Router>
           <div>
             <Nav />
-            <Route path="/" exact component={Home} />
-            <Route path="/tags" exact component={Home} />
-            <Route path="/tags/:tag" component={Tags} />
-            <Route path="/:category" exact component={Categories} />
-            <Route path="/:category/:title" component={Post} />
+            <Route render={({ location }) => (
+              <RouteTransition
+                pathname={location.pathname}
+                atEnter={{ opacity: 0 }}
+                atLeave={{ opacity: 0 }}
+                atActive={{ opacity: 1 }}
+              >
+                <Switch>
+                  <Route path="/" exact component={Home} />
+                  <Route path="/tags" exact component={Home} />
+                  <Route path="/tags/:tag" component={Tags} />
+                  <Route path="/:category" exact component={Categories} />
+                  <Route path="/:category/:title" component={Post} />
+                </Switch>
+              </RouteTransition>
+            )} />
           </div>
         </Router>
       )
