@@ -22,7 +22,7 @@ const wrapWithPending = (pendingKey, cb) => (effects, ...a) =>
     .then(value => effects.setFlag(pendingKey, false).then(() => value))
 
 const getFromAPI = memoize((route: string) =>
-  get(`/api/${route}.json`)
+  get(`api/${route}.json`)
   .then((res) => {
     console.log('res:', res.body)
     return res.body
