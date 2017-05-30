@@ -4,11 +4,34 @@ import { injectState } from 'freactal'
 import {
   find,
 } from 'lodash/fp'
-import { get } from 'axios'
 
+import { has } from '../utils'
+import Spinner from '../components/Spinner'
 import Post from '../components/Post'
 
 class PostView extends Component {
+  props: {
+    state: {
+      postPending?: boolean,
+      excerpts: Array<Object>,
+      post: Object,
+    },
+    effects: {
+      getPost: Function,
+    },
+    match: {
+      params: {
+        title: string,
+      },
+    },
+  }
+
+  static defaultProps = {
+    state: {
+      postPending: true,
+    },
+  }
+
   state = {
     post: find(e => e.file === this.props.match.params.title, this.props.state.excerpts),
   }
@@ -17,22 +40,22 @@ class PostView extends Component {
     this.getPost()
   }
 
-  componentWillReceiveProps() {
-    this.getPost()
+  componentWillReceiveProps(nextProps) {
+    if (has(nextProps.state.post, 'file') && nextProps.state.post.file === this.props.match.params.title) {
+      this.setState({ post: nextProps.state.post })
+    }
   }
 
   getPost = () => {
-    const { match } = this.props
-    const file = match.params.title
-    get(`/api/posts/${file}.json`)
-      .then(res => res.data)
-      .then(post => this.setState({ post }))
+    this.props.effects.getPost(this.props.match.params.title)
   }
 
   render() {
+    console.log('state:', this.state)
     return (
       <div style={{ padding: '10px' }}>
-        <Post {...this.state.post} />
+        {this.state.post && <Post {...this.state.post} />}
+        {this.props.state.postPending && <Spinner />}
       </div>
     )
   }

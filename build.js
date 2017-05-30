@@ -1,10 +1,11 @@
 // @flow
+/* eslint-disable no-console */
 const fs = require('fs')
 const path = require('path')
 const globby = require('globby')
 const marked = require('marked')
 const matter = require('gray-matter')
-const { mkdirp } = require('mkdirp')
+const mkdirp = require('mkdirp')
 const { Observable } = require('rxjs')
 const Promise = require('bluebird')
 const yaml = require('js-yaml')

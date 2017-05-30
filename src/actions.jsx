@@ -1,11 +1,12 @@
 // @flow
 import { provideState } from 'freactal'
-import { get } from 'axios'
+import { get } from 'superagent'
 import {
   countBy,
   flatten,
   identity,
   map,
+  memoize,
   pipe,
   pluck,
   reverse,
@@ -20,22 +21,28 @@ const wrapWithPending = (pendingKey, cb) => (effects, ...a) =>
     .then(() => cb(effects, ...a))
     .then(value => effects.setFlag(pendingKey, false).then(() => value))
 
+const getFromAPI = memoize((route: string) =>
+  get(`/api/${route}.json`)
+  .then((res) => {
+    console.log('res:', res.body)
+    return res.body
+  }))
+
 const Provider = provideState({
   initialState: () => ({
     post: {},
-    postsPending: false,
+    postPending: false,
     excerpts: [],
     excerptsPending: false,
   }),
   effects: {
     setFlag: (effects, key, value) => state => ({ ...state, [key]: value }),
-    getPost: wrapWithPending('postPending', file =>
-      get(`/api/posts/${file}.json`)
-        .then(res => res.data)
+    getPost: wrapWithPending('postPending', (_, file) =>
+      getFromAPI(`posts/${file}`)
         .then(post => state => ({ ...state, post }))),
     getPosts: wrapWithPending('excerptsPending', () =>
-      get('/api/posts/index.json')
-        .then(res => res.data.content.posts)
+      getFromAPI('posts/index')
+        .then(res => res.content.posts)
         .then(pipe(sortBy('date'), reverse))
         .then(excerpts => state => ({ ...state, excerpts }))),
   },
@@ -58,4 +65,4 @@ const Provider = provideState({
   },
 })
 
-export { Provider }
+export default Provider

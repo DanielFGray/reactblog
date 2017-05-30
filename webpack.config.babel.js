@@ -24,7 +24,7 @@ const cssOpts = {
   }),
 }
 
-const pluginList = [
+const plugins = [
   new webpack.optimize.CommonsChunkPlugin({
     name: 'vendor',
     minChunks: module =>
@@ -43,6 +43,13 @@ const pluginList = [
   }),
 ]
 
+const entry = ['./src/index']
+
+if (process.env.NODE_ENV !== 'production') {
+  plugins.push(new webpack.HotModuleReplacementPlugin())
+  entry.push('react-hot-loader/patch')
+}
+
 const stats = {
   chunks: false,
   modules: false,
@@ -50,7 +57,7 @@ const stats = {
 }
 
 module.exports = {
-  entry: './src/index',
+  entry,
   resolve: {
     extensions: ['.js', '.jsx'],
   },
@@ -64,7 +71,7 @@ module.exports = {
       cssOpts,
     ],
   },
-  plugins: pluginList,
+  plugins,
   devServer: {
     contentBase: path.resolve(__dirname, 'public'),
     publicPath: '/',

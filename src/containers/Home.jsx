@@ -4,6 +4,7 @@ import { injectState } from 'freactal'
 
 import style from './Home.sss'
 import PostExcerpt from '../components/Post'
+import Spinner from '../components/Spinner'
 
 const Home = ({ state }) => {
   if (state.postsPending) {
@@ -14,6 +15,7 @@ const Home = ({ state }) => {
     <div className={style.excerpts}>
       {state.excerpts.map(e =>
         <PostExcerpt key={`${e.title}${e.date}`} {...e} />)}
+      {state.postPending && <Spinner />}
     </div>
   )
 }

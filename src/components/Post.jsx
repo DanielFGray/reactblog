@@ -27,7 +27,6 @@ const PostView = ({ category, file, title, date, tags, content }: {
         {title}
       </Link>
     </h3>
-    <div className={style.content} dangerouslySetInnerHTML={{ __html: content }} />
     <div className={style.meta}>
       <div className={style.category}>
         <Link to={`/${category}`}>
@@ -41,6 +40,7 @@ const PostView = ({ category, file, title, date, tags, content }: {
       </div>
       <PostTags tags={tags} />
     </div>
+    <div className={style.content} dangerouslySetInnerHTML={{ __html: content }} />
   </div>
 )
 
