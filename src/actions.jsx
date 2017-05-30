@@ -23,10 +23,7 @@ const wrapWithPending = (pendingKey, cb) => (effects, ...a) =>
 
 const getFromAPI = memoize((route: string) =>
   get(`api/${route}.json`)
-  .then((res) => {
-    console.log('res:', res.body)
-    return res.body
-  }))
+    .then((res) => JSON.parse(res.body)))
 
 const Provider = provideState({
   initialState: () => ({
