@@ -1,6 +1,5 @@
 // @flow
 import { provideState } from 'freactal'
-import { get } from 'superagent'
 import {
   countBy,
   flatten,
@@ -22,8 +21,9 @@ const wrapWithPending = (pendingKey, cb) => (effects, ...a) =>
     .then(value => effects.setFlag(pendingKey, false).then(() => value))
 
 const getFromAPI = memoize((route: string) =>
-  get(`api/${route}.json`)
-    .then((res) => JSON.parse(res.body)))
+  fetch(`api/${route}.json`)
+    .then(x => x.json())
+    .then(x => x))
 
 const Provider = provideState({
   initialState: () => ({
