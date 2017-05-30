@@ -7,7 +7,6 @@ import {
   Switch,
 } from 'react-router-dom'
 import { injectState } from 'freactal'
-import { RouteTransition } from 'react-router-transition'
 
 import './style.sss'
 import Provider from './actions'
@@ -31,26 +30,13 @@ class App extends Component {
       <Router>
         <div>
           <Nav />
-          <Route render={({ location }) => (
-            <RouteTransition
-              pathname={location.pathname}
-              atEnter={{ opacity: 0 }}
-              atLeave={{ opacity: 0 }}
-              atActive={{ opacity: 1 }}
-              runOnMount
-              mapStyles={() => ({
-                position: 'absolute',
-              })}
-            >
-              <Switch>
-                <Route path="/" exact component={Home} />
-                <Route path="/tags" exact component={Home} />
-                <Route path="/tags/:tag" component={Tags} />
-                <Route path="/:category" exact component={Categories} />
-                <Route path="/:category/:title" component={Post} />
-              </Switch>
-            </RouteTransition>)}
-          />
+          <Switch>
+            <Route path="/" exact component={Home} />
+            <Route path="/tags" exact component={Home} />
+            <Route path="/tags/:tag" component={Tags} />
+            <Route path="/:category" exact component={Categories} />
+            <Route path="/:category/:title" component={Post} />
+          </Switch>
         </div>
       </Router>
     )
