@@ -116,7 +116,7 @@ I don't want to go into setting up and configuring a big fancy database, so we w
 [sqlite]: https://sqlite.org/
 [rdbms]: https://en.wikipedia.org/wiki/Relational_database_management_system
 
-```
+``` bash
 npm install --save sqlite3 knex
 ```
 
@@ -211,7 +211,7 @@ app.listen(port, () => {
 
 Requesting the data is the easy part, with curl we can simply:
 
-```
+``` bash
 curl localhost:3000/api/v1/movies
 ```
 

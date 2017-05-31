@@ -35,7 +35,7 @@ var app4 = new Vue({
 </div>
 ```
 
-If you're familiar with JavaScript, the first chunk shouldn't be too hard to grok. The second part is HTML, except Vue has introduced a custom attribute, `v-for`, into the mix, which lets you perform a loop with some crazy Vue magic.
+If you're familiar with JavaScript, the first chunk shouldn't be too hard to grok. The second part is HTML, except Vue has introduced the attribute `v-for` into the mix, which lets you perform a loop with some crazy Vue magic.
 
 This is how I would do the same thing done in React:
 
@@ -54,6 +54,10 @@ var TodoList = props =>
 
 ReactDOM.render(<TodoList todos={data} />, document.querySelector('#app'))
 ```
+
+It introduces markup directly into the JavaScript file, but uses JavaScript's existing logic, in this case it uses `map` to iterate and transform the array.
+
+---
 
 I think this shows the two fundamental differences between the two approaches:
 
@@ -80,7 +84,7 @@ This is why I use and recommend React.
 
 Conversely, Angular and Vue introduce a huge amount of DSL logic, and Angular in particular has one of the largest APIs I've ever seen in a library. The more time spent learning a library, the less time spent writing application code.
 
-But I won't pretend it's all sunshine and rainbows. Angular and View have the benefit that you can drop in a `<script>` tag and go to town. With React there's some pretty complex tooling involved if you want to use JSX, at minimum you need a transpiler like Babel (which thankfully can be learned in ~5 minutes), and to properly organize your code into separate files you'll want a bundler like Webpack (which can take you hours to get working how you'd like).
+I won't pretend it's all sunshine and rainbows though. Angular and Vue have the benefit of being able drop in a `<script>` tag and go to town. With React there's some pretty complex tooling involved if you want to use JSX, at minimum you need a transpiler like Babel (which thankfully can be learned in ~5 minutes), and to properly organize your code into separate files you'll want a bundler like Webpack (which can take you hours to get working how you'd like).
 
 ---
 

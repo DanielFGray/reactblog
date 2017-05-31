@@ -1,4 +1,4 @@
-// @flow
-const has = (obj: Object, key: string) => Object.prototype.hasOwnProperty.call(obj, key)
+const has = (obj, key) =>
+  Object.prototype.hasOwnProperty.call(obj, key)
 
-export { has }
+module.exports = { has }

@@ -1,15 +1,31 @@
-@import 'normalize.css'
+*
+  box-model: box-sizing
 
 body
-  background: #eee
+  background: #f9f9f9
+  color: #111
   font-family: sans
   margin: 0
+  overflow-y: scroll
+
+code, pre
+  font-family: monospace !important
+  font-size: 1.1em !important
+
+pre
+  padding: 20px
+  overflow: auto
 
 a:link, a:visited
   text-decoration: none
 
 a:hover
   text-decoration: underline
+
+.content
+  max-width: 800px
+  margin: 0 auto
+  line-height: 1.5
 
 @keyframes spin
   0%
@@ -32,4 +48,3 @@ a:hover
     border: 0.25rem solid #3336
     border-top-color: #333
     animation: spin 1s infinite linear
-

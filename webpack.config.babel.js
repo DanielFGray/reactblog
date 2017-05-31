@@ -13,16 +13,26 @@ const babelOpts = {
   ],
 }
 
-const cssOpts = {
-  test: /\.[sc]ss$/,
-  exclude: /node_modules/,
-  use: ExtractTextPlugin.extract({
-    use: [
-      'css-loader?modules',
-      'postcss-loader',
-    ],
-  }),
-}
+const cssOpts = [
+  {
+    test: /\.[sc]ss$/,
+    exclude: /node_modules/,
+    use: ExtractTextPlugin.extract({
+      use: [
+        'css-loader?modules',
+        'postcss-loader',
+      ],
+    }),
+  },
+  {
+    test: /css$/,
+    use: ExtractTextPlugin.extract({
+      use: [
+        'css-loader',
+      ],
+    }),
+  },
+]
 
 const plugins = [
   new webpack.optimize.CommonsChunkPlugin({
@@ -68,7 +78,7 @@ module.exports = {
   module: {
     rules: [
       babelOpts,
-      cssOpts,
+      ...cssOpts,
     ],
   },
   plugins,

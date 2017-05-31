@@ -8,7 +8,10 @@ import {
 } from 'react-router-dom'
 import { injectState } from 'freactal'
 
-import './style.sss'
+import 'normalize.css'
+import 'highlight.js/styles/tomorrow.css'
+import style from './style.sss'
+
 import Provider from './actions'
 import Home from './containers/Home'
 import Nav from './components/Nav'
@@ -30,13 +33,15 @@ class App extends Component {
       <Router>
         <div>
           <Nav />
-          <Switch>
-            <Route path="/" exact component={Home} />
-            <Route path="/tags" exact component={Home} />
-            <Route path="/tags/:tag" component={Tags} />
-            <Route path="/:category" exact component={Categories} />
-            <Route path="/:category/:title" component={Post} />
-          </Switch>
+          <article className={style.content}>
+            <Switch>
+              <Route path="/" exact component={Home} />
+              <Route path="/tags" exact component={Home} />
+              <Route path="/tags/:tag" component={Tags} />
+              <Route path="/:category" exact component={Categories} />
+              <Route path="/:category/:title" component={Post} />
+            </Switch>
+          </article>
         </div>
       </Router>
     )

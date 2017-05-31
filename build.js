@@ -9,18 +9,33 @@ const mkdirp = require('mkdirp')
 const { Observable } = require('rxjs')
 const Promise = require('bluebird')
 const yaml = require('js-yaml')
-const cheerio = require('cheerio')
+const $ = require('cheerio')
+const highlight = require('highlight.js')
 
 const readFile = Promise.promisify(fs.readFile)
 const mkdir = Promise.promisify(mkdirp)
 
 const config = yaml.safeLoad(fs.readFileSync('config.yaml', 'utf8'))
 
+highlight.configure({
+  tabreplace: '  ',
+})
+const renderer = new marked.Renderer()
+renderer.code = function renderCode(code, lang) {
+  const c = this.options.highlight(code, lang)
+  if (! lang) return `<pre><code>${c}</code></pre>`
+  const langClass = `hljs ${this.options.langPrefix}${lang}`
+  return `<pre><code class="${langClass}">${c}</code></pre>`
+}
+
 marked.setOptions({
   sanitize: false,
   breaks: true,
   tables: true,
   gfm: true,
+  renderer,
+  highlight: (code, language) =>
+    (language ? highlight.highlight(language, code).value : code),
 })
 
 const base = path.resolve(__dirname, config.contentDir)
@@ -33,9 +48,7 @@ const markdown2json = fileName =>
     .map(({ data, content }) => merge(data, {
       file: fileName.replace(new RegExp(`^${base}(.*).md$`), '$1'),
       content: marked(content),
-    }))
-    .map(x => merge(x, {
-      date: (new Date(x.date)).getTime(),
+      date: (new Date(data.date)).getTime(),
     }))
 
 const writeFile = (o) => {
@@ -58,7 +71,7 @@ const writeFile = (o) => {
 
 const excerpt = o =>
   merge(o, {
-    content: cheerio(o.content).first('p').text(),
+    content: $(o.content).first('p').text(),
     file: o.file.split('/').slice(-1)[0],
   })
 

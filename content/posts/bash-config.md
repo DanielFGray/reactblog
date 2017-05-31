@@ -8,7 +8,7 @@ date:  2017/2/21
 
 Many times a script is written that needs extra/persistent configuration from the user. In most languages this is no big deal, you just import your json/yaml/toml parser and you're good to go. The common thing to do for many bash scripts that require configuration is to ask the user to put another actual bash script containing variable declarations in the file:
 
-``` sh
+``` bash
 # config
 foo='bar baz'
 
@@ -30,7 +30,7 @@ anotherkey  another value
 
 Here's how I parse config files:
 
-``` sh
+``` bash
 #!/usr/bin/env bash
 
 declare -r config_dir="${XDG_CONFIG_DIR:-$HOME/.config}/my_script"

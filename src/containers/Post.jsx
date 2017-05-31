@@ -51,7 +51,6 @@ class PostView extends Component {
   }
 
   render() {
-    console.log('state:', this.state)
     return (
       <div style={{ padding: '10px' }}>
         {this.state.post && <Post {...this.state.post} />}
