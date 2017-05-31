@@ -24,6 +24,7 @@
     "marked": "^0.3.6",
     "mkdirp": "^0.5.1",
     "normalize.css": "^7.0.0",
+    "prismjs": "^1.6.0",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
     "react-router-dom": "^4.1.1",

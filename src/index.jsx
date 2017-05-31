@@ -9,7 +9,7 @@ import {
 import { injectState } from 'freactal'
 
 import 'normalize.css'
-import 'highlight.js/styles/tomorrow.css'
+import 'prismjs/themes/prism-okaidia.css'
 import style from './style.sss'
 
 import Provider from './actions'

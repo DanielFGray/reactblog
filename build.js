@@ -10,22 +10,21 @@ const { Observable } = require('rxjs')
 const Promise = require('bluebird')
 const yaml = require('js-yaml')
 const $ = require('cheerio')
-const highlight = require('highlight.js')
+const prism = require('prismjs')
+
+const { has } = require('./src/utils')
 
 const readFile = Promise.promisify(fs.readFile)
 const mkdir = Promise.promisify(mkdirp)
 
 const config = yaml.safeLoad(fs.readFileSync('config.yaml', 'utf8'))
 
-highlight.configure({
-  tabreplace: '  ',
-})
 const renderer = new marked.Renderer()
 renderer.code = function renderCode(code, lang) {
   const c = this.options.highlight(code, lang)
   if (! lang) return `<pre><code>${c}</code></pre>`
-  const langClass = `hljs ${this.options.langPrefix}${lang}`
-  return `<pre><code class="${langClass}">${c}</code></pre>`
+  const langClass = `${this.options.langPrefix}${lang}`
+  return `<pre class="${langClass}"><code>${c}</code></pre>`
 }
 
 marked.setOptions({
@@ -33,9 +32,14 @@ marked.setOptions({
   breaks: true,
   tables: true,
   gfm: true,
+  langPrefix: 'language-',
   renderer,
-  highlight: (code, language) =>
-    (language ? highlight.highlight(language, code).value : code),
+  highlight: (code, language) => {
+    if (! has(prism.languages, language)) {
+      language = prism.languages[language] || 'markup' // eslint-disable-line no-param-reassign
+    }
+    return prism.highlight(code, prism.languages[language])
+  },
 })
 
 const base = path.resolve(__dirname, config.contentDir)
