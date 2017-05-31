@@ -23,6 +23,13 @@ const renderer = new marked.Renderer()
 renderer.code = function renderCode(code, lang) {
   const c = this.options.highlight(code, lang)
   if (! lang) return `<pre><code>${c}</code></pre>`
+  if (! prism.languages[lang]) {
+    const component = `prismjs/components/prism-${lang}.min.js`
+    if (fs.statSync(path.join(__dirname, 'node_modules', component))) {
+      // flow-disable-next-line
+      require(component) // eslint-disable-line global-require,import/no-dynamic-require
+    } else return `<pre><code>${c}</code></pre>`
+  }
   const langClass = `${this.options.langPrefix}${lang}`
   return `<pre class="${langClass}"><code>${c}</code></pre>`
 }
