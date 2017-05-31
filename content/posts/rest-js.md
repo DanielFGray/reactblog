@@ -13,9 +13,9 @@ Getting started with making web APIs can be confusing, even overwhelming at firs
 First let's create a `package.json` and add a dependency:
 
 ``` bash
-cd rest_api
-npm init -y
-npm install --save express
+$ cd rest_api
+$ npm init -y
+$ npm install --save express
 ```
 
 Then let's create a super minimal 'hello world' with express and save it as `index.js`:
@@ -57,7 +57,7 @@ Another way to test this instead of opening your browser is with either [cURL][c
 Once you have curl installed it should be as simple to get your Hello World in the shell with:
 
 ``` bash
-curl localhost:3000
+$ curl localhost:3000
 ```
 
 ## Request parameters
@@ -73,7 +73,7 @@ app.get('/:name', (req, res) => {
 Then, with curl:
 
 ``` bash
-curl localhost:3000/foo
+$ curl localhost:3000/foo
 ```
 
 You should see "Hello foo!"
@@ -85,7 +85,7 @@ To get the above change working, you first have to stop the server and then rest
 [nodemon]: https://nodemon.io/
 
 ``` bash
-npm install --save-dev nodemon
+$ npm install --save-dev nodemon
 ```
 
 Then alter your package.json so that it looks like this:
@@ -117,7 +117,7 @@ I don't want to go into setting up and configuring a big fancy database, so we w
 [rdbms]: https://en.wikipedia.org/wiki/Relational_database_management_system
 
 ``` bash
-npm install --save sqlite3 knex
+$ npm install --save sqlite3 knex
 ```
 
 Rather than interacting with the database directly, we're going to use a query builder called [knex][knex]. knex allows you to write your queries in plain JavaScript, which provides an abstraction layer over your database driver. This makes it so your queries aren't necessarily tied to a specific database engine, and if you want to change to a different database later it's a much less difficult migration, sometimes only just a few lines.
@@ -212,7 +212,7 @@ app.listen(port, () => {
 Requesting the data is the easy part, with curl we can simply:
 
 ``` bash
-curl localhost:3000/api/v1/movies
+$ curl localhost:3000/api/v1/movies
 ```
 
 which right now will return an empty JSON array.
@@ -226,7 +226,7 @@ To be able to properly create movies, we need to introduce a piece of express mi
 [middleware]: http://expressjs.com/en/guide/using-middleware.html
 
 ``` bash
-npm install --save body-parser
+$ npm install --save body-parser
 ```
 
 Then add it to the imports:
@@ -291,7 +291,7 @@ app.listen(port, () => {
 Using curl we can now insert data with:
 
 ``` bash
-curl -X POST -d 'released=2017' -d 'title=nothing good' localhost:3000/api/v1/movies
+$ curl -X POST -d 'released=2017' -d 'title=nothing good' localhost:3000/api/v1/movies
 ```
 
 Which will return the new number of rows.
@@ -368,13 +368,13 @@ app.delete('/api/v1/movies', (req, res) => {
 Now we can edit movies by passing field names as data pieces in curl:
 
 ``` bash
-curl -X PUT -d 'id=1' -d 'title=new title' localhost:3000/api/v1/movies
+$ curl -X PUT -d 'id=1' -d 'title=new title' localhost:3000/api/v1/movies
 ```
 
 And delete them by passing the id:
 
 ``` bash
-curl -X DELETE -d 'id=1' localhost:3000/api/v1/movies
+$ curl -X DELETE -d 'id=1' localhost:3000/api/v1/movies
 ```
 
 # Conclusion

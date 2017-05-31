@@ -14,7 +14,7 @@ Display managers are usually a fancy graphical wrapper around a few basic comman
 
 My `xinitrc` is a bit complex, but here it is:
 
-``` sh
+``` bash
 #!/usr/bin/env bash
 
 # arguments passed to startx start at $2 for some reason..
@@ -60,7 +60,7 @@ Now that you have an xinitrc script, you can disable your display manager. I can
 
 Running `startx` after login every time is pretty annoying though. Wouldn't it be nice if we could automatically run `startx` when we login?
 
-``` sh
+``` bash
 if [[ -z "$DISPLAY" && "$TTY" = '/dev/tty1' ]]; then
   exec startx startxfce4
 fi
@@ -74,7 +74,7 @@ If you use bash you'll want to save this as `~/.bash_login`, or if you use zsh y
 
 If you have a few window managers or desktop environments installed, you'll probably want to be able change between them without editing a script. I hacked together a solution that uses Junegunn's [fzf](https://github.com/junegunn/fzf) to list and choose those that are available. If `fzf` isn't installed or available for some reason it falls back to bash's built in `select` feature. You'll want to change your `bash_login` or `zlogin` script to something like this:
 
-``` sh
+``` bash
 if [[ -z "$DISPLAY" && "$TTY" = '/dev/tty1' ]]; then
   exec startx "$(wmpicker)"
 fi
@@ -82,7 +82,7 @@ fi
 
 Then, in a new file, save this somewhere in your user's `$PATH` (ideally `~/.bin` or `~/.local/bin`) and `chmod +x` to make it executable. If you don't have a local-user bin directory I'd strongly suggest making one (the details are a bit out of the scope of this article, you'll have to consult your shell's docs), but if you're lazy you could save it in `/usr/local/bin`, just don't forget to `chmod +x`.
 
-``` sh
+``` bash
 #!/usr/bin/env bash
 
 declare -a known_wms

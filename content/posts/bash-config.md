@@ -21,7 +21,7 @@ echo "$foo"  # prints 'bar baz'
 
 But this is horrible to me. This doesn't just define variables, this evaluates code! Ideally, a configuration file should be parsed, not evaluated. For a few scripts I've written lately, I've been including a function that parses plain-text in the following format:
 
-```
+``` bash
 somekey     some value
 anotherkey  some value
 anotherkey  another value
