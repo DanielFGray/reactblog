@@ -52,15 +52,27 @@ marked.setOptions({
 const base = path.resolve(__dirname, config.contentDir)
 const merge = (...a) => Object.assign({}, ...a)
 
-const markdown2json = fileName =>
-  Observable.from(readFile(fileName))
-    .map(x => x.toString())
-    .map(x => matter(x))
-    .map(({ data, content }) => merge(data, {
-      file: fileName.replace(new RegExp(`^${base}(.*).md$`), '$1'),
-      content: marked(content),
-      date: (new Date(data.date)).getTime(),
-    }))
+const fileGlob = globby(`${config.contentDir}/**/*.md`, { absolute: true })
+const file$ = Observable.from(fileGlob)
+  .flatMap(x => x)
+  .flatMap(fileName =>
+    Observable.from(readFile(fileName))
+      .map(x => x.toString())
+      .map(x => matter(x))
+      .map(({ data, content }) => merge(data, {
+        file: fileName.replace(new RegExp(`^${base}(.*).md$`), '$1'),
+        content: marked(content),
+        date: (new Date(data.date)).getTime(),
+      })))
+
+const index = file$
+  .filter(x => x.layout === 'post')
+  .map(x => merge(x, {
+    content: $(x.content).first('p').text(),
+    file: x.file.split('/').slice(-1)[0],
+  }))
+  .reduce((p, c) => p.concat(c), [])
+  .map(x => ({ content: { posts: x }, file: 'posts/index' }))
 
 const writeFile = (o) => {
   const filePieces = o.file
@@ -79,23 +91,6 @@ const writeFile = (o) => {
     })
     .catch(console.log)
 }
-
-const excerpt = o =>
-  merge(o, {
-    content: $(o.content).first('p').text(),
-    file: o.file.split('/').slice(-1)[0],
-  })
-
-const fileGlob = globby(`${config.contentDir}/**/*.md`, { absolute: true })
-const file$ = Observable.from(fileGlob)
-  .flatMap(x => x)
-  .flatMap(x => markdown2json(x))
-
-const index = file$
-  .filter(x => x.layout === 'post')
-  .map(x => excerpt(x))
-  .reduce((p, c) => p.concat(c), [])
-  .map(x => ({ content: { posts: x }, file: 'posts/index' }))
 
 Observable.merge(file$, index)
   .subscribe(writeFile, console.error)
