@@ -19,29 +19,32 @@ const PostView = ({ category, file, title, date, tags, content }: {
   title: string,
   date: number,
   tags: Array<string>,
-  content: string
-}) => (
-  <div className={style.postExcerpt}>
-    <h3>
-      <Link to={`/${category}/${file}`}>
-        {title}
-      </Link>
-    </h3>
-    <div className={style.meta}>
-      <div className={style.category}>
-        <Link to={`/${category}`}>
-          {category}
+  content: string,
+}) => {
+  const dateObj = new Date(date)
+  return (
+    <div className={style.postExcerpt}>
+      <h1 className={style.title}>
+        <Link to={`/${category}/${file}`}>
+          {title}
         </Link>
+      </h1>
+      <div className={style.meta}>
+        <div className={style.category}>
+          <Link to={`/${category}`}>
+            {category}
+          </Link>
+        </div>
+        <div className={style.date}>
+          <a title={dateObj.toLocaleDateString()}>
+            {ago(dateObj)}
+          </a>
+        </div>
+        <PostTags tags={tags} />
       </div>
-      <div className={style.date}>
-        <a title={(new Date(date)).toLocaleDateString()}>
-          {ago(new Date(date))}
-        </a>
-      </div>
-      <PostTags tags={tags} />
+      <div className={style.content} dangerouslySetInnerHTML={{ __html: content }} />
     </div>
-    <div className={style.content} dangerouslySetInnerHTML={{ __html: content }} />
-  </div>
-)
+  )
+}
 
 export default PostView
