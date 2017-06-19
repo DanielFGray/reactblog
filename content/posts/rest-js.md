@@ -41,7 +41,7 @@ app.listen(port, () => {
 
 Express is imported, then an instance is created and saved as `app`.
 
-`app.get()` tells the Express instance to listen for `GET` requests to the specified route, here it's just `/`. When this route is requested, the given callback is fired, in this case it sends the string "Hello world!" as a response.
+`app.get()` tells the Express instance to listen for `GET` requests to the specified route; here it's just `/`. When this route is requested, the given callback is fired, in this case it sends the string "Hello world!" as a response.
 
 Finally, `port` is declared as a variable which can be set from the environment, or otherwise defaults to `3000` if none is specified. Express then listens on that port, and after the server has finally started it uses `console.log` to print a message in the terminal.
 
@@ -69,6 +69,8 @@ app.get('/:name', (req, res) => {
   res.send(`Hello ${req.params.name}!`)
 })
 ```
+
+You'll want to add this before the `app.listen()` command so that it gets registered properly.
 
 Then, with curl:
 
@@ -111,7 +113,7 @@ Among other things, a movie would have a title and a date it was released, and t
 
 --- 
 
-I don't want to go into setting up and configuring a big fancy database, so we will use the most excellent [SQLite][sqlite]. SQLite is a great [RDBMS][rdbms] that uses files to represent databases, and doesn't require any background processes to store or retrieve data. If you already have a database like PostgreSQL or MariaDB running feel free to use those, you should only have to adjust only a couple of things.
+I don't want to go into setting up and configuring a big fancy database, so we will use the most excellent [SQLite][sqlite]. SQLite is a great [RDBMS][rdbms] that uses files to represent databases, and doesn't require any background processes to store or retrieve data. If you already have a database like PostgreSQL or MariaDB running feel free to use those, you should only have to adjust a couple of things.
 
 [sqlite]: https://sqlite.org/
 [rdbms]: https://en.wikipedia.org/wiki/Relational_database_management_system
@@ -221,7 +223,7 @@ Accepting `POST` requests is where things get a bit tricky...
 
 To be able to properly create movies, we need to introduce a piece of express middleware:
 
-* Express middleware are little modules that are ran 'in the middle' of the request. They usually alter the request or response objects in some way. There are tons of middleware modules for express, and explaining them in-depth is a bit out of scope for this post, but if you'd like to read more, check out the [offical docs][middleware].
+* Express middleware are little modules that are run 'in the middle' of the request. They usually alter the request or response objects in some way. There are tons of middleware modules for express, and explaining them in-depth is a bit out of scope for this post, but if you'd like to read more, check out the [offical docs][middleware].
 
 [middleware]: http://expressjs.com/en/guide/using-middleware.html
 
@@ -229,7 +231,7 @@ To be able to properly create movies, we need to introduce a piece of express mi
 $ npm install --save body-parser
 ```
 
-Then add it to the imports:
+Then add it to the imports at the top:
 
 ``` javascript
 const bodyParser = require('body-parser')
@@ -383,4 +385,4 @@ We learned how to make a single endpoint respond to different actions and query 
 
 Hopefully I didn't rush through too much and explain things enough, I'm still getting used to this whole technical writing thing.
 
-I'll make a follow up to to this to show how to make a React front-end to display and edit data.
+At some point I'll make a follow up to to this to show how to make a React front-end to display and edit data.

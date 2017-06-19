@@ -160,7 +160,7 @@ Rx.Observable.from(glob)
 
 It's mostly the same, only an Observable is created inside the stream, which `flatMap` resolves and returns the value from it. This also allows `file` to be in scope the whole time.
 
-At this point it becomes pretty trivial to parse the markdown into actual html. `marked` has been my favorite choice for this, and adding it into the mix looks like this: 
+At this point it becomes pretty trivial to parse the markdown into actual html. [marked][marked] has been my favorite choice for this, and adding it into the mix looks like this: 
 
 ``` javascript
 const fs = require('fs')

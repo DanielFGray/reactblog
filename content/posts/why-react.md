@@ -55,7 +55,7 @@ var TodoList = props =>
 ReactDOM.render(<TodoList todos={data} />, document.querySelector('#app'))
 ```
 
-It introduces markup directly into the JavaScript file, but uses JavaScript's existing logic, in this case it uses `map` to iterate and transform the array.
+It introduces markup directly into the JavaScript file, but uses JavaScript's existing logic; in this case it uses `map` to iterate and transform the array.
 
 ---
 
@@ -68,7 +68,7 @@ Both of these approaches create a [DSL](https://en.wikipedia.org/wiki/Domain-spe
 
 When you're working with Vue or Angular you're using their flavor of logic mixed into your HTML.
 
-When you're working with React, you use JavaScript's native logic mixed with it's flavor of markup (JSX).
+When you're working with React, you use JavaScript's native logic mixed with its flavor of markup (JSX).
 
 JSX is the biggest deviation from regular JavaScript that React introduces, it's similar to XML/HTML, but not quite same. The difference between JSX and the normal HTML you'd write can be summed up pretty quickly:
 

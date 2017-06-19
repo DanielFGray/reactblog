@@ -14,7 +14,7 @@ foo='bar baz'
 
 # script
 #!/usr/bin/env bash
-...
+# ...
 source $HOME/.config/my_script/config
 echo "$foo"  # prints 'bar baz'
 ```
