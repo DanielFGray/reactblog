@@ -1,50 +1,17 @@
 // @flow
 import React from 'react'
-import { Link } from 'react-router-dom'
-import ago from 's-ago'
+import { Helmet } from 'react-helmet'
 
+import Excerpt from './Excerpt'
 import style from './Post.sss'
 
-const PostTags = ({ tags }: {
-  tags: Array<string>,
-}) => (
-  <ul className={style.postTagList}>
-    {tags.map(e => <li key={e}><Link to={`/tags/${e}`}>{e}</Link></li>)}
-  </ul>
+const PostView = (props: Object) => (
+  <article className={style.post}>
+    <Helmet>
+      <title>DanielFGray - {props.title}</title>
+    </Helmet>
+    <Excerpt {...props} />
+  </article>
 )
-
-const PostView = ({ category, file, title, date, tags, content }: {
-  file: string,
-  category: string,
-  title: string,
-  date: number,
-  tags: Array<string>,
-  content: string,
-}) => {
-  const dateObj = new Date(date)
-  return (
-    <div className={style.postExcerpt}>
-      <h1 className={style.title}>
-        <Link to={`/${category}/${file}`}>
-          {title}
-        </Link>
-      </h1>
-      <div className={style.meta}>
-        <div className={style.category}>
-          <Link to={`/${category}`}>
-            {category}
-          </Link>
-        </div>
-        <div className={style.date}>
-          <a title={dateObj.toLocaleDateString()}>
-            {ago(dateObj)}
-          </a>
-        </div>
-        <PostTags tags={tags} />
-      </div>
-      <div className={style.content} dangerouslySetInnerHTML={{ __html: content }} />
-    </div>
-  )
-}
 
 export default PostView
