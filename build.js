@@ -72,7 +72,7 @@ const index = file$
     file: x.file.split('/').slice(-1)[0],
   }))
   .reduce((p, c) => p.concat(c), [])
-  .map(x => ({ content: { posts: x }, file: 'posts/index' }))
+  .map(x => ({ posts: x, file: 'posts/index' }))
 
 const writeFile = (o) => {
   const filePieces = o.file

@@ -1,10 +1,6 @@
 // @flow
 import React, { Component } from 'react'
 import { injectState } from 'freactal'
-import {
-  find,
-} from 'lodash/fp'
-
 import { has } from '../utils'
 import Spinner from '../components/Spinner'
 import Post from '../components/Post'
@@ -33,7 +29,8 @@ class PostView extends Component {
   }
 
   state = {
-    post: find(e => e.file === this.props.match.params.title, this.props.state.excerpts),
+    post: this.props.state.excerpts
+      .find(e => e.file === this.props.match.params.title),
   }
 
   componentDidMount() {
