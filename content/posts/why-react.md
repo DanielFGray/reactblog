@@ -90,4 +90,4 @@ I won't pretend it's all sunshine and rainbows though. Angular and Vue have the 
 
 "But why do I want to go through all that when what I'm doing works perfectly well right now?" You may ask. And I don't have a good answer for you, but I would like to offer you a small example of what it's like using React to query a JSON API and print the results.
 
-<iframe src="https://codesandbox.io/embed/NkB6R6O2L?autoresize=1&hidenavigation=1" style="width:100%; height:500px; border:0; border-radius: 4px; overflow:hidden;" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+<iframe src="https://codesandbox.io/embed/NkB6R6O2L?module=wRo98&autoresize=1&hidenavigation=1" style="width:100%; height:500px; border:0; border-radius: 5px; overflow:hidden;" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
