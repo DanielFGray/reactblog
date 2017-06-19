@@ -36,7 +36,7 @@ Here's how I parse config files:
 declare -r config_dir="${XDG_CONFIG_DIR:-$HOME/.config}/my_script"
 declare -r config_file="${config_dir}/conf"
 
-declare somekey=foo
+declare somekey=foo    # define a default value
 declare -a anotherkey
 
 parse_config_file() {
@@ -47,9 +47,10 @@ parse_config_file() {
     (( ++nr ))
     # ignore empty lines and lines starting with a #
     [[ -z "$line" || "$line" = '#'* ]] && continue
-    read -r key <<< "${line%% *}"  # grabs the first word and strips trailing whitespace
-    read -r val <<< "${line#* }"  # grabs everything after the first word and strips trailing whitespace
+    read -r key <<< "${line%% *}"   # grabs the first word and strips trailing whitespace
+    read -r val <<< "${line#* }"    # grabs everything after the first word and strips trailing whitespace
     if [[ -z "$val" ]]; then
+      # store errors in an array
       config_err+=( "missing value for \"$key\" in config file on line $nr" )
       continue
     fi
@@ -59,10 +60,11 @@ parse_config_file() {
         if [[ $val =~ ^foo$|^bar$|^baz$ ]]; then
           somekey="$val"
         else
+          # more error handling
           config_err+=( "unknown value \"$val\" for \"$key\" in config file on line $nr" )
           config_err+=( '  must be "foo" "bar" or "baz"' )
         fi ;;
-      anotherkey) anotherkey=( "$val" ) ;; # allow multiple keys stored in an array
+      anotherkey) anotherkey+=( "$val" ) ;; # allow multiple keys stored in an array
       *) config_err+=( "unknown key \"$key\" in config file on line $nr" )
     esac
   done
