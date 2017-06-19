@@ -8,6 +8,8 @@ date: 2017/06/18
 
 I had a fun time making my own static-site generator for this blog, and I thought this could serve as a practical introduction to Functional Reactive Programming (FRP).
 
+# Getting started
+
 The idea I had when I set out to re-create this blog (which previously used [Hexo][hexo]), was that I wanted to make a React front-end for my markdown content which would requested asynchronously as necessary. I tried a few different static site generators, and could not seem to get any of them to output JSON, so I thought "well how hard could it be?"
 
 So, I have a folder full of markdown files, and I'd ideally like to get this in the form of an array.
@@ -54,6 +56,8 @@ Rx.Observable.from(glob)
 
 Although, still not a huge improvement over simply using a Promise.
 
+# Reading files
+
 Let's try and actually read each file. I find the default callback nature of the `fs` module in node.js slightly awkward to use, and prefer using [Bluebird][bluebird] to create a Promise-based interface, which also works really well with RxJS.
 
 ``` javascript
@@ -94,7 +98,7 @@ There's a fair amount going on here in a few lines so let's re-cap:
 
 I should probably point out that an Observable can be initialized, but doesn't perform any actions until it is `subscribe`d to. Much like Promises can be initialized, but do not resolve until `.then()` is called on it.
 
----
+# Parsing front matter
 
 My markdown files contain front matter, and so I started looking for a library to parse that. I eventually found [gray-matter][graymatter], which takes a string containing front matter and returns an object.
 
@@ -160,6 +164,8 @@ Rx.Observable.from(glob)
 
 It's mostly the same, only an Observable is created inside the stream, which `flatMap` resolves and returns the value from it. This also allows `file` to be in scope the whole time.
 
+# Generating HTML
+
 At this point it becomes pretty trivial to parse the markdown into actual html. [marked][marked] has been my favorite choice for this, and adding it into the mix looks like this: 
 
 ``` javascript
@@ -192,6 +198,8 @@ Rx.Observable.from(glob)
 
 This has 90% of the functionality I wanted, all that is lft is writing each item in the stream to disk. This is where things got ugly.
 
+# Writing to disk
+
 I'm going to skim over the details, but this takes an object containing a `file` key, and writes to a directory called `public` and maintains the same path that the file came from. So if a file was in `content/posts/foo.md` it will be written to `public/posts/foo.json`.
 
 ``` javascript
@@ -212,6 +220,8 @@ const writeFile = (object) => {
     .catch(console.log)
 }
 ```
+
+I'm also using a Promisified [mkdirp][mkdirp] to create directories as they're needed. The whole thing so far looks like:
 
 ``` javascript
 const fs = require('fs')
@@ -259,7 +269,9 @@ Rx.Observable.from(glob)
   .subscribe(writeFile)
 ```
 
-This works, but I still wasn't happy. There were two key features I still wanted: an `index.json` that contained all the metadata of each post and a small excerpt, and syntax highlighting.
+This *works*, but I still wasn't happy. There were two key features I still wanted: an `index.json` that contained all the metadata of each post and a small excerpt, and syntax highlighting.
+
+# Excerpts
 
 Creating a 'meta-file' turned out to be pretty easy. I found [cheerio][cheerio] which lets me operate on strings of html with an api similar to jQuery, which made it really easy to grab the first paragraph of each post. After that I needed to create a new stream from the existing stream (a meta-stream for my meta-data), and then create one big array containing all the files in the stream:
 
@@ -290,6 +302,8 @@ const index$ = file$
 Rx.Observable.merge(file$, index$)
   .subscribe(writeFile)
 ```
+
+# Syntax highlighting
 
 Syntax highlighting turned out to be a bigger pain than I thought. I tried a few different libraries and eventually settled on [prism.js][prism]. It turned out that I had to `require()` all the different languages I used, and I'd prefer not to update my build script for each language I may blog about, so I had to figure out how to dynamically require each language. In the end this is what I came up with:
 
@@ -337,5 +351,6 @@ The whole script can be found here on GitLab: https://gitlab.com/danielfgray/rea
 [bluebird]: http://bluebirdjs.com/docs/getting-started.html
 [graymatter]: https://github.com/jonschlinkert/gray-matter
 [marked]: https://github.com/chjj/marked
+[mkdirp]: https://github.com/substack/node-mkdirp
 [cheerio]: https://cheerio.js.org/
 [prism]: http://prismjs.com/
