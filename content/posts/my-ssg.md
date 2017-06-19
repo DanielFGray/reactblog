@@ -15,7 +15,7 @@ I played around with a few different methods for this, and in the end settled on
 
 ``` javascript
 const globby = require('globby')
-globby('${__dirname}/content/**/*.md', { absolute: true })
+globby(`${__dirname}/content/**/*.md`, { absolute: true })
   .then(console.log)
 ```
 
@@ -31,7 +31,7 @@ const Rx = require('rxjs')
 
 const contentDir = `${__dirname}/content`
 
-const glob = globby('${contentDir}/**/*.md', { absolute: true })
+const glob = globby(`${contentDir}/**/*.md`, { absolute: true })
 
 Rx.Observable.from(glob)
   .subscribe(console.log)
@@ -45,7 +45,7 @@ const Rx = require('rxjs')
 
 const contentDir = `${__dirname}/content`
 
-const glob = globby('${contentDir}/**/*.md', { absolute: true })
+const glob = globby(`${contentDir}/**/*.md`, { absolute: true })
 
 Rx.Observable.from(glob)
   .flatMap(x => x)
@@ -65,7 +65,7 @@ const Promise = require('bluebird')
 const contentDir = `${__dirname}/content`
 
 const readFile = Promise.promisify(fs.readFile)
-const glob = globby('${contentDir}/**/*.md', { absolute: true })
+const glob = globby(`${contentDir}/**/*.md`, { absolute: true })
 
 Rx.Observable.from(glob)
   .flatMap(x => x)
@@ -110,7 +110,7 @@ const matter = require('gray-matter')
 const contentDir = `${__dirname}/content`
 
 const readFile = Promise.promisify(fs.readFile)
-const glob = globby('${contentDir}/**/*.md', { absolute: true })
+const glob = globby(`${contentDir}/**/*.md`, { absolute: true })
 
 Rx.Observable.from(glob)
   .flatMap(x => x)
@@ -175,7 +175,7 @@ const contentDir = `${__dirname}/content`
 const merge = (...objects) => Object.assign({}, ...objects)
 
 const readFile = Promise.promisify(fs.readFile)
-const glob = globby('${contentDir}/**/*.md', { absolute: true })
+const glob = globby(`${contentDir}/**/*.md`, { absolute: true })
 
 Rx.Observable.from(glob)
   .flatMap(x => x)
@@ -227,7 +227,7 @@ const contentDir = `${__dirname}/content`
 const merge = (...objects) => Object.assign({}, ...objects)
 
 const readFile = Promise.promisify(fs.readFile)
-const glob = globby('${contentDir}/**/*.md', { absolute: true })
+const glob = globby(`${contentDir}/**/*.md`, { absolute: true })
 
 const writeFile = (object) => {
   const filePieces = object.file
