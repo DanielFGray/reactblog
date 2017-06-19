@@ -287,7 +287,7 @@ const index$ = file$
   .reduce((p, c) => p.concat(c), [])
   .map(x => ({ content: x, file: 'index' }))
 
-Observable.merge(file$, index$)
+Rx.Observable.merge(file$, index$)
   .subscribe(writeFile)
 ```
 
