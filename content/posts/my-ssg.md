@@ -196,7 +196,7 @@ Rx.Observable.from(glob)
   .subscribe(console.log)
 ```
 
-This has 90% of the functionality I wanted, all that is lft is writing each item in the stream to disk. This is where things got ugly.
+This has 90% of the functionality I wanted, all that is left is writing each item in the stream to disk. This is where things got ugly.
 
 # Writing to disk
 
