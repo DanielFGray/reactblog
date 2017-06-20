@@ -45,6 +45,18 @@ class PostView extends Component {
 
   getPost = () => {
     this.props.effects.getPost(this.props.match.params.title)
+      .then(this.hashLinkScroll)
+  }
+
+  hashLinkScroll = () => {
+    const { hash } = window.location
+    if (hash !== '') {
+      setTimeout(() => {
+        const id = hash.replace('#', '')
+        const element = document.getElementById(id)
+        if (element) element.scrollIntoView()
+      }, 0)
+    }
   }
 
   render() {
