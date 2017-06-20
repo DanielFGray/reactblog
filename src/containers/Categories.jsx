@@ -1,16 +1,20 @@
 // @flow
 import React from 'react'
 import { injectState } from 'freactal'
+import { Helmet } from 'react-helmet'
 
 import style from './Home.sss'
-import PostExcerpt from '../components/Post'
+import Excerpt from '../components/Excerpt'
 
 const Categories = ({ state, match }) => {
   const posts = state.excerpts.filter(e => e.category === match.params.category)
   return (
     <div className={style.excerpts}>
+      <Helmet>
+        <title>DanielFGray - {match.params.category}</title>
+      </Helmet>
       {posts.map(e =>
-        <PostExcerpt key={`${e.title}${e.date}`} {...e} />)}
+        <Excerpt key={`${e.title}${e.date}`} {...e} />)}
     </div>
   )
 }
