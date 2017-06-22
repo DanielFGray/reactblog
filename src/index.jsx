@@ -2,7 +2,7 @@
 import React, { Component } from 'react'
 import { render } from 'react-dom'
 import {
-  HashRouter as Router,
+  BrowserRouter as Router,
   Route,
   Switch,
 } from 'react-router-dom'
@@ -16,6 +16,7 @@ import Provider from './actions'
 import Home from './containers/Home'
 import Nav from './components/Nav'
 import Post from './containers/Post'
+import Page from './containers/Page'
 import Categories from './containers/Categories'
 import Tags from './containers/Tags'
 
@@ -36,6 +37,8 @@ class App extends Component {
           <article className={style.content}>
             <Switch>
               <Route path="/" exact component={Home} />
+              {this.props.state.pages.map(e =>
+                <Route key={e.toLowerCase()} path={`/${e.toLowerCase()}`} exact component={Page} />)}
               <Route path="/tags" exact component={Home} />
               <Route path="/tags/:tag" component={Tags} />
               <Route path="/:category" exact component={Categories} />

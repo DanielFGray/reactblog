@@ -5,15 +5,13 @@ import { Helmet } from 'react-helmet'
 
 import style from './Home.sss'
 import Excerpt from '../components/Excerpt'
-import Spinner from '../components/Spinner'
 
-const Home = ({ state: { excerpts, excerptsPending } }) => (
+const Home = ({ state: { excerpts } }) => (
   <div className={style.excerpts}>
     <Helmet>
       <title>DanielFGray</title>
     </Helmet>
-    {excerptsPending && <Spinner />}
-    {excerpts.map(e =>
+    {excerpts.filter(e => e.layout === 'post').map(e =>
       <Excerpt key={`${e.title}${e.date}`} {...e} />)}
   </div>
 )

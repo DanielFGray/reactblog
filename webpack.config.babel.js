@@ -47,9 +47,9 @@ const plugins = [
   new HtmlWebpackPlugin({
     template: 'src/index.ejs',
     inject: false,
+    mobile: true,
     title: 'DanielFGray',
     appMountId: 'root',
-    devServer: '',
   }),
 ]
 

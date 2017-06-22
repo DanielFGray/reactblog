@@ -28,11 +28,18 @@ renderer.code = function renderCode(code, lang) {
     if (fs.statSync(path.join(__dirname, 'node_modules', component))) {
       // flow-disable-next-line
       require(component) // eslint-disable-line global-require,import/no-dynamic-require
-    } else return `<pre>${c}</pre>`
+    } else {
+      return `<pre class="language-">${c}</pre>`
+    }
   }
   const langClass = `${this.options.langPrefix}${lang}`
   return `<pre class="${langClass}">${c}</pre>`
 }
+renderer.heading = function headings(text, level) {
+  const escapedText = text.toLowerCase().replace(/[^\w]+/g, '-')
+  return `<h${level}><a name="${escapedText}" class="anchor" href="#${escapedText}"><span class="header-link">${'#'.repeat(level)} ${text}</span></a></h${level}>`
+}
+
 
 marked.setOptions({
   sanitize: false,
@@ -66,13 +73,12 @@ const file$ = Observable.from(fileGlob)
       })))
 
 const index = file$
-  .filter(x => x.layout === 'post')
   .map(x => merge(x, {
     content: $(x.content).first('p').text(),
     file: x.file.split('/').slice(-1)[0],
   }))
   .reduce((p, c) => p.concat(c), [])
-  .map(x => ({ posts: x, file: 'posts/index' }))
+  .map(x => ({ pages: x, file: 'posts/index' }))
 
 const writeFile = (o) => {
   const filePieces = o.file

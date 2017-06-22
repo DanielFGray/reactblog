@@ -2,7 +2,7 @@
 layout: post
 title: "How I Made My Own Static-Site Generator"
 category: computers
-tags: [programming, javascript, frp, rxjs]
+tags: [programming, javascript, frp]
 date: 2017/06/18
 ---
 
@@ -10,7 +10,7 @@ I had a fun time making my own static-site generator for this blog, and I though
 
 # Getting started
 
-The idea I had when I set out to re-create this blog (which previously used [Hexo][hexo]), was that I wanted to make a React front-end for my markdown content which would requested asynchronously as necessary. I tried a few different static site generators, and could not seem to get any of them to output JSON, so I thought "well how hard could it be?"
+The idea I had when I set out to re-create this blog (which previously used [Hexo][hexo]), was that I wanted to make a React front-end for my markdown content which would be requested asynchronously as necessary. I tried a few different static site generators, and could not seem to get any of them to output JSON, so I thought "well how hard could it be?"
 
 So, I have a folder full of markdown files, and I'd ideally like to get this in the form of an array.
 I played around with a few different methods for this, and in the end settled on [globby][globby].

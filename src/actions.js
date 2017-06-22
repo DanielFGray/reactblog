@@ -23,7 +23,7 @@ const wrapWithPending = (pendingKey, cb) => (effects, ...a) =>
     .then(value => effects.setFlag(pendingKey, false).then(() => value))
 
 const getFromAPI = memoize((route: string) =>
-  fetch(`api/${route}.json`)
+  fetch(`/api/${route}.json`)
     .then(x => x.json())
     .then(x => x))
 
@@ -46,14 +46,16 @@ const Provider = provideState({
         .then(post => state => ({ ...state, post }))),
     getPosts: wrapWithPending('excerptsPending', () =>
       getFromAPI('posts/index')
-        .then(res => res.posts)
+        .then(res => res.pages)
         .then(pipe(sortBy('date'), reverse))
         .then(excerpts => state => ({ ...state, excerpts }))),
   },
   computed: {
-    pages: ({ excerpts }) => excerpts
-      .filter(x => x.layout === 'page')
-      .map(x => x.title),
+    pages: pipe(
+      get('excerpts'),
+      filter(x => x.layout !== 'post'),
+      pluck('title'),
+    ),
     categories:
       pipe(
         get('excerpts'),

@@ -5,20 +5,24 @@ import { NavLink } from 'react-router-dom'
 
 import style from './Nav.sss'
 
-const TagList = ({ categories }: { categories: Array<string> }) => (
-  categories.length ?
-    <nav>
-      <ul className={style.nav}>
-        <li><NavLink to="/" exact activeClassName={style.activeLinkStyle}>home</NavLink></li>
-        {categories.map(e => (
-          <li key={e}>
-            <NavLink to={`/${e}`} activeClassName={style.activeLinkStyle}>
-              {e}
-            </NavLink>
-          </li>))}
-      </ul>
-    </nav>
-  : null
+const titleCase = (str: string) =>
+  str[0].toUpperCase().concat(str.slice(1).toLowerCase())
+
+const TagList = ({ categories, pages }: {
+  categories: Array<string>,
+  pages: Array<string>,
+}) => (
+  <nav>
+    <ul className={style.nav}>
+      <li><NavLink to="/" exact activeClassName={style.activeLinkStyle}>Home</NavLink></li>
+      {pages.concat(categories).map(e => (
+        <li key={e}>
+          <NavLink to={`/${e.toLowerCase()}`} activeClassName={style.activeLinkStyle}>
+            {titleCase(e)}
+          </NavLink>
+        </li>))}
+    </ul>
+  </nav>
 )
 
-export default injectState(TagList, ['categories'])
+export default injectState(TagList, ['categories', 'pages'])
