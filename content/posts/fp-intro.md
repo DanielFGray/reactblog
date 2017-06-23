@@ -1,13 +1,12 @@
 ---
 layout: post
-title: "Transducers Demystified"
+title: "A small intro to functional programming"
 category: computers
-tags: [programming, javascript, php, unfinished]
+tags: [programming, javascript, php]
 date: 2017/1/10
 ---
 
-# TODO: introduction
-* FIXME: is transducers even the right term here?
+What's a functor anyway?
 
 ---
 
@@ -23,7 +22,7 @@ $sum = 0;
 for ($i = 0; $i < count($ints); $i++) {
   $ints[$i] += $sum;
 }
-echo $sum; //=> 10
+echo $sum; // -> 10
 ```
 
 While there's nothing particularly *wrong* with this (although I could nitpick a few things that bother me, namely re-calculating the length of the array before every iteration, and polluting scope with unnecessary variables), I just find it ugly.
@@ -31,45 +30,50 @@ While there's nothing particularly *wrong* with this (although I could nitpick a
 Functional programming offers an alternative approach:
 
 ``` php
-$sum = array_reduce($ints, function($previous, $current) {
-  return $previous + $current;
-}, 0);
-echo $sum; //=> 10
+function add($a, $b) {
+  return $a + $b;
+}
+$sum = array_reduce($ints, add, 0);
+echo $sum; // -> 10
 ```
 
-The idea of `reduce` is that it takes an iterable (usually an array), performs some computation with it, and then returns a single value from those computations.
+The idea of `reduce` is that it takes an iterable (usually an array) an initial value, performs some computation with it, and then returns a single value from those computations.
 
 A simple implementation of `reduce()` might be something like this:
 
 ``` php
-function reduce($arr, $func, $initial=null) {
+function reduce($func, $arr, $initial) {
   $response = $initial;
   for($i = 0, $l = count($arr); $i < $l; ++$i) {
-    $response = $func($response, $arr[$i], $i);
+    $response = $func($response, $arr[$i]);
   }
   return $response;
 }
+
+reduce(function(a, b) { return a + b; }, [1, 2, 3, 4], 0) // -> 10
 ```
 
 The real magic is the fourth line: `$response = $func($response, $arr[$i], $i);`.
 * At the beginning of the function, `$response` is initialized as a copy of the `$initial` argument.
-* After every iteration, `$response` is re-assigned with the value of calling `$func()`. This calls the variable as a function. If it's not a function it will error, you could do some error checking and test whether it is actually callable, which is what most implementations do.
-* When it calls the function passed, it sends the previous value of `$response` (since it has yet to actually be assigned), the current element in the array, and the index of the element, to be passed as arguments to the given `$func` so they may be accessed inside function.
+* After every iteration, `$response` is re-assigned with the value of calling `$func()`. This calls the variable as a function.
+* When it calls the function given to it, it sends the previous value of `$response` (since it has yet to actually be assigned) and the current element in the array as arguments to the given `$func` so they may be accessed inside of it.
 * Then finally, `$response` is returned.
 
 Here's the same code in JavaScript:
 
 ``` javascript
-function reduce(arr, func, initial) {
+function reduce(func, arr, initial) {
   let response = initial;
   for (let i = 0, l = arr.length; i < l; ++i) {
-    response = func(response, arr[i], i);
+    response = func(response, arr[i]);
   }
   return response;
-};
+}
+
+reduce((a, b) => a + b, [1, 2, 3, 4], 0)  // -> 10
 ```
 
-The core of this idea, is that `reduce` is a function that expects a function as an argument (although in the above examples they only assume as much, since there's no type checking), and it then calls that given function inside the `reduce` function. A function that takes another function as an argument is a called a *Higher-Order Function*.
+A function that takes another function as an argument (or returns another function) is a called a *Higher-Order Function*. Reduce is a higher-order function that "folds" a list of values into a single value, by passing a callback function the previous value of 
 
 # Map
 
@@ -85,17 +89,18 @@ $squared = [];
 for($i = 0, $length = count($ints); $i < $length; ++$i) {
   $squared[] = $ints[$i] * $ints[$i];
 }
-echo join(', ', $ints); //=> 1, 4, 9, 16
+echo join(', ', $ints); // -> 1, 4, 9, 16
 ```
 
 In functional programming, when you want to iterate over a set and transform it, you would use `map`.
 
 ``` php
+function square($n) {
+  return $n * $n;
+}
 $ints = [1, 2, 3, 4];
-$squared = array_map(function($current) {
-  return $current * $current;
-}, $ints);
-echo join(', ', $ints); //=> 1, 4, 9, 16
+$squared = array_map(square, $ints);
+echo join(', ', $ints); // -> 1, 4, 9, 16
 ```
 
 This is much tidier, in my opinion. When you see that big messy `for` loop, you have no idea what's going on until you fully read the whole thing and attempt to mentally parse it. When you see `map`, without reading anything but that word, you immediately know that you are creating a copy of an array and changing all the values based on a given function.
@@ -103,8 +108,8 @@ This is much tidier, in my opinion. When you see that big messy `for` loop, you 
 You could implement `map` like the following:
 
 ``` php
-function map($arr, $func) {
-  $response = $arr;
+function map($func, $arr) {
+  $response = array_clone($arr);
   for ($i = 0, $l = count($response); $i < $l; ++$i) {
     $response[i] = func($response[i], $i);
   }
@@ -122,7 +127,7 @@ $squared = array_reduce($ints, function($previous, $current) {
   $previous[] = $current * $current;
   return $previous;
 }, []);
-echo join(', ', $squared); //=> 1, 4, 9, 16
+echo join(', ', $squared); // -> 1, 4, 9, 16
 ```
 
 It works just as expected!
@@ -131,8 +136,8 @@ In fact, you can write `map` as just a wrapper around reduce:
 
 ``` php
 function map($arr, $func) {
-  return reduce($arr, function($previous, $current, $index) use ($func) {
-    $previous[] = $func($current, $index);
+  return reduce($arr, function($previous, $current) use ($func) {
+    $previous[] = $func($current);
     return $previous;
   }, []);
 }
@@ -142,16 +147,16 @@ Or, in JavaScript:
 
 ``` javascript
 // ES5
-const map = function(array, func) {
-  return reduce(array, function(previous, current, index) {
-    return previous.concat(func(current, index)), []);
+function map(arr, fn) {
+  return reduce(arr, function(p, c) {
+    return p.concat(fn(c)), []);
   }
 }
 
 // ES2015
 const map = (arr, fn) =>
-  reduce(arr, (a, c, i) =>
-    a.concat(fn(c, i)), []);
+  reduce(arr, (p, c) =>
+    p.concat(fn(c)), []);
 ```
 
 # Filter
@@ -160,8 +165,8 @@ const map = (arr, fn) =>
 
 ``` php
 function filter($arr, $func) {
-  return reduce($arr, function($previous, $current, $index) use ($func, $arr) {
-    if ($func($current, $arr, $index)) {
+  return reduce($arr, function($previous, $current) use ($func, $arr) {
+    if ($func($current, $arr)) {
       $previous[] = $current;
     }
     return $previous;
@@ -170,15 +175,12 @@ function filter($arr, $func) {
 ```
 
 ``` javascript
-const filter = (array, callback) => {
-  return reduce(array,(previous, current, index) =>  {
-    if (callback(current, array, index)) {
-      return previous.concat(current);
-    } else {
-      return previous;
-    }
-  }
-}
+const filter = (array, callback) =>
+  reduce((previous, current) =>
+    callback(current, array)
+      ? previous.concat(current)
+      : previous,
+    array)
 ```
 
 # TODO: Terminology
