@@ -15,7 +15,7 @@
     a:hover
       text-decoration: underline
 
-  :last-child
+  &:last-child
     border-bottom: 0
 
   .meta
@@ -51,6 +51,18 @@
 
         &:last-child::after
           content: ' ]'
+
+.content
+  p::first
+    margin-top: 0
+
+  h1, h2, h3, h4, h5, h6
+    a
+      font-size: 0.8em
+      opacity: 0.5
+
+      &:hover
+        opacity: 1
 
 .comments
   background: #fff
