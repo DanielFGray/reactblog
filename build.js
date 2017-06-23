@@ -7,7 +7,7 @@ const globby = require('globby')
 const marked = require('marked')
 const matter = require('gray-matter')
 const mkdirp = require('mkdirp')
-const { Observable } = require('rxjs');
+const { Observable } = require('rxjs')
 const Promise = require('bluebird')
 const yaml = require('js-yaml')
 const $ = require('cheerio')
@@ -86,6 +86,11 @@ const convert$ = file$
     Observable.from(readFile(file))
       .map(x => x.toString())
       .map(x => matter(x))
+      .map(({ data, content }) => merge(data, {
+        file: file.replace(new RegExp(`^${contentDir}(.*).md$`), '$1'),
+        content: marked(content),
+        date: (new Date(data.date)).getTime(),
+      })))
   .filter(x => x.draft !== true || config.draftMode)
 
 const meta$ = convert$
@@ -100,6 +105,10 @@ const meta$ = convert$
 Observable.merge(convert$, meta$)
   .flatMap((x) => {
     const filePieces = x.file.split('/').filter(p => p.length > 0)
+    const outputDir = path.resolve(__dirname, config.outputDir)
+    const filePath = path.join(outputDir, ...filePieces)
+    const [_, outBase, basename] = Array.from(filePath.match(/^(.+)\/([^/]+)$/))
+    const fileName = path.join(outBase, basename).concat('.json')
     const output = JSON.stringify(merge(x, { file: basename }))
     return mkdir(outBase).then(() => {
       const write$ = fs.createWriteStream(`${fileName}`)
