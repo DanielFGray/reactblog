@@ -45,7 +45,7 @@ const Provider = provideState({
       getFromAPI(`posts/${file}`)
         .then(post => state => ({ ...state, post }))),
     getPosts: wrapWithPending('excerptsPending', () =>
-      getFromAPI('posts/index')
+      getFromAPI('index')
         .then(res => res.pages)
         .then(pipe(sortBy('date'), reverse))
         .then(excerpts => state => ({ ...state, excerpts }))),
