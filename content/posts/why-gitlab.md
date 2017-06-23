@@ -8,15 +8,15 @@ date: 2017/2/16
 
 Occasionally people ask me why I use GitLab instead of GitHub.
 
-## free private repos
+# Free Private Repos
 
 The only reason I've found to pay for GitHub's premium service is for private repos. But why pay for that when you can get it elsewhere for free?
 
-## open source
+# Open Source
 
 I'll save the tin-foil hats and ethical arguments for another post, suffice it to say I just really prefer using software that I can hack on and third parties can audit.
 
-## superior continuous integration
+# Superior Continuous Integration
 
 This is what really sold me. I'd had an account on GitLab before, but I hadn't really used it until I learned this.
 
@@ -33,4 +33,4 @@ I've since set-up a couple of other projects that use this, using React+Babel+We
 
 ---
 
-The only down-sides I've experienced are that GitLab is a bit slower compared too GitHub, and doesn't have the community size that GitHub has.
+The only down-sides I've experienced are that GitLab is a bit slower compared to GitHub, and doesn't have the community size that GitHub has.
