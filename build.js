@@ -19,6 +19,7 @@ commander.option('-w, --watch', 're-build on file changes')
 commander.parse(process.argv)
 
 const readFile = Promise.promisify(fs.readFile)
+const stat = Promise.promisify(fs.stat)
 const mkdir = Promise.promisify(mkdirp)
 
 const merge = (...a) => Object.assign({}, ...a)
@@ -59,71 +60,53 @@ marked.setOptions({
   },
 })
 
-const getConfig = async () => {
-  const config = yaml.safeLoad(await readFile('config.yaml', 'utf8'))
-  if (! config.contentDir || ! config.outputDir) {
-    console.error('contentDir and outputDir must be specified in config.yaml')
-    process.exit(1)
-  }
-  return config
+const config = yaml.safeLoad(fs.readFileSync('config.yaml', 'utf8'))
+if (! config.contentDir || ! config.outputDir) {
+  console.error('contentDir and outputDir must be specified in config.yaml')
+  process.exit(1)
 }
 
+const contentDir = path.resolve(__dirname, config.contentDir)
+const fileGlob = `${config.contentDir}/**/*.md`
 
-const main = ({ source, config }) => {
-  const base = path.resolve(__dirname, config.contentDir)
-  const file$ = source
-    .flatMap(fileName =>
-      Observable.from(readFile(fileName))
-      .map(x => matter(x.toString()))
-      .map(({ data, content }) => merge(data, {
-        file: fileName.replace(new RegExp(`^${base}(.*).md$`), '$1'),
-        content: marked(content),
-        date: (new Date(data.date)).getTime(),
-      })))
-    .filter(x => x.draft !== true || config.draftMode)
-
-  const meta$ = file$
-    .map(x => merge(x, {
-      content: $(x.content).first('p').text(),
-      file: x.file.split('/').slice(-1)[0],
-    }))
-    .scan((p, c) => merge(p, { [c.file.replace(/\.md$/, '')]: c }), {})
-    .map(x => ({ pages: x, file: 'index' }))
-    .debounceTime(500)
-
-  const writeFile = (o) => {
-    const filePieces = o.file.split('/').filter(p => p.length > 0)
-    const outputDir = path.resolve(__dirname, config.outputDir)
-    const filePath = path.join(outputDir, ...filePieces)
-    const [_, outBase, basename] = Array.from(filePath.match(/^(.+)\/([^/]+)$/))
-    const fileName = path.join(outBase, basename).concat('.json')
-    const output = JSON.stringify(merge(o, { file: basename }))
-    return mkdir(outBase)
-      .then(() => {
-        const write$ = fs.createWriteStream(`${fileName}`)
-        write$.write(output)
-        write$.close()
-        return Promise.promisify(fs.stat)(fileName)
-      })
-      .then(x => console.log(`${fileName.replace(__dirname, '')} written [${x.size / 1024}Kb]`))
-      .catch(console.log)
-  }
-
-  return Observable.merge(file$, meta$)
-    .subscribe(writeFile, console.error)
-}
-
-(async () => {
-  const config = await getConfig()
-  const fileGlob = `${config.contentDir}/**/*.md`
-  const source = commander.watch
-    ? Observable.create((obs) => {
+const file$ = commander.watch
+  ?
+    Observable.create((obs) => {
       const watcher = chokidar.watch(fileGlob)
-      watcher.on('add', p => obs.next(p))
-      watcher.on('change', p => obs.next(p))
+      watcher.on('add', file => obs.next(file))
+      watcher.on('change', file => obs.next(file))
     })
-      .map(p => path.resolve(p))
-    : Observable.from(globby(fileGlob, { absolute: true }))
-        .flatMap(x => x)
-  main({ config, source })
-})()
+  :
+    Observable.from(globby(fileGlob))
+      .flatMap(x => x)
+
+const convert$ = file$
+  .map(file => path.resolve(file))
+  .flatMap(file =>
+    Observable.from(readFile(file))
+      .map(x => x.toString())
+      .map(x => matter(x))
+  .filter(x => x.draft !== true || config.draftMode)
+
+const meta$ = convert$
+  .map(x => merge(x, {
+    content: $(x.content).first('p').text(),
+    file: x.file.split('/').slice(-1)[0],
+  }))
+  .scan((p, c) => merge(p, { [c.file.replace(/\.md$/, '')]: c }), {})
+  .map(x => ({ pages: x, file: 'index' }))
+  .debounceTime(500)
+
+Observable.merge(convert$, meta$)
+  .flatMap((x) => {
+    const filePieces = x.file.split('/').filter(p => p.length > 0)
+    const output = JSON.stringify(merge(x, { file: basename }))
+    return mkdir(outBase).then(() => {
+      const write$ = fs.createWriteStream(`${fileName}`)
+      write$.write(output)
+      write$.close()
+      return stat(fileName)
+        .then(stats => `${fileName.replace(__dirname, '')} written [${stats.size / 1024}Kb]`)
+    })
+  })
+  .subscribe(console.log, console.error)
