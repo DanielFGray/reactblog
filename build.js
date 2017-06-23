@@ -1,5 +1,6 @@
 // @flow
 /* eslint-disable no-console */
+const commander = require('commander')
 const fs = require('fs')
 const path = require('path')
 const globby = require('globby')
@@ -11,13 +12,17 @@ const Promise = require('bluebird')
 const yaml = require('js-yaml')
 const $ = require('cheerio')
 const prism = require('prismjs')
-
+const chokidar = require('chokidar')
 const { has } = require('./src/utils')
 
+commander.option('-w, --watch', 're-build on file changes')
+commander.parse(process.argv)
+
 const readFile = Promise.promisify(fs.readFile)
+const stat = Promise.promisify(fs.stat)
 const mkdir = Promise.promisify(mkdirp)
 
-const config = yaml.safeLoad(fs.readFileSync('config.yaml', 'utf8'))
+const merge = (...a) => Object.assign({}, ...a)
 
 const renderer = new marked.Renderer()
 renderer.code = function renderCode(code, lang) {
@@ -37,9 +42,8 @@ renderer.code = function renderCode(code, lang) {
 }
 renderer.heading = function headings(text, level) {
   const escapedText = text.toLowerCase().replace(/[^\w]+/g, '-')
-  return `<h${level}><a name="${escapedText}" class="anchor" href="#${escapedText}"><span class="header-link">${'#'.repeat(level)} ${text}</span></a></h${level}>`
+  return `<h${level}><a name="${escapedText}" class="anchor" href="#${escapedText}"><span class="header-link">${'#'.repeat(level)}</span></a> ${text}</h${level}>`
 }
-
 
 marked.setOptions({
   sanitize: false,
@@ -56,47 +60,62 @@ marked.setOptions({
   },
 })
 
-const base = path.resolve(__dirname, config.contentDir)
-const merge = (...a) => Object.assign({}, ...a)
+const config = yaml.safeLoad(fs.readFileSync('config.yaml', 'utf8'))
+if (! config.contentDir || ! config.outputDir) {
+  console.error('contentDir and outputDir must be specified in config.yaml')
+  process.exit(1)
+}
 
-const fileGlob = globby(`${config.contentDir}/**/*.md`, { absolute: true })
-const file$ = Observable.from(fileGlob)
-  .flatMap(x => x)
-  .flatMap(fileName =>
-    Observable.from(readFile(fileName))
+const contentDir = path.resolve(__dirname, config.contentDir)
+const fileGlob = `${config.contentDir}/**/*.md`
+
+const file$ = commander.watch
+  ?
+    Observable.create((obs) => {
+      const watcher = chokidar.watch(fileGlob)
+      watcher.on('add', file => obs.next(file))
+      watcher.on('change', file => obs.next(file))
+    })
+  :
+    Observable.from(globby(fileGlob))
+      .flatMap(x => x)
+
+const convert$ = file$
+  .map(file => path.resolve(file))
+  .flatMap(file =>
+    Observable.from(readFile(file))
       .map(x => x.toString())
       .map(x => matter(x))
       .map(({ data, content }) => merge(data, {
-        file: fileName.replace(new RegExp(`^${base}(.*).md$`), '$1'),
+        file: file.replace(new RegExp(`^${contentDir}(.*).md$`), '$1'),
         content: marked(content),
         date: (new Date(data.date)).getTime(),
       })))
+  .filter(x => x.draft !== true || config.draftMode)
 
-const index = file$
+const meta$ = convert$
   .map(x => merge(x, {
     content: $(x.content).first('p').text(),
     file: x.file.split('/').slice(-1)[0],
   }))
-  .reduce((p, c) => p.concat(c), [])
-  .map(x => ({ pages: x, file: 'posts/index' }))
+  .scan((p, c) => merge(p, { [c.file.replace(/\.md$/, '')]: c }), {})
+  .map(x => ({ pages: x, file: 'index' }))
+  .debounceTime(500)
 
-const writeFile = (o) => {
-  const filePieces = o.file
-    .split('/')
-    .filter(p => p.length > 0)
-  const outputDir = path.resolve(__dirname, config.outputDir)
-  const filePath = path.join(outputDir, ...filePieces)
-  // flow-disable-next-line
-  const [_, outBase, basename] = Array.from(filePath.match(/^(.+)\/([^/]+)$/))
-  return mkdir(outBase)
-    .then(() => {
-      const fileName = path.join(outBase, basename)
-      const write$ = fs.createWriteStream(`${fileName}.json`)
-      const output = JSON.stringify(merge(o, { file: basename }))
-      return write$.write(output)
+Observable.merge(convert$, meta$)
+  .flatMap((x) => {
+    const filePieces = x.file.split('/').filter(p => p.length > 0)
+    const outputDir = path.resolve(__dirname, config.outputDir)
+    const filePath = path.join(outputDir, ...filePieces)
+    const [_, outBase, basename] = Array.from(filePath.match(/^(.+)\/([^/]+)$/))
+    const fileName = path.join(outBase, basename).concat('.json')
+    const output = JSON.stringify(merge(x, { file: basename }))
+    return mkdir(outBase).then(() => {
+      const write$ = fs.createWriteStream(`${fileName}`)
+      write$.write(output)
+      write$.close()
+      return stat(fileName)
+        .then(stats => `${fileName.replace(__dirname, '')} written [${stats.size / 1024}Kb]`)
     })
-    .catch(console.log)
-}
-
-Observable.merge(file$, index)
-  .subscribe(writeFile, console.error)
+  })
+  .subscribe(console.log, console.error)
