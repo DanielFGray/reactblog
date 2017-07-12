@@ -1,6 +1,7 @@
 // @flow
 import React, { Component } from 'react'
 import { injectState } from 'freactal'
+import { Helmet } from 'react-helmet'
 import { has } from '../utils'
 import Spinner from '../components/Spinner'
 import Page from '../components/Page'
@@ -32,7 +33,7 @@ class PostView extends Component {
   }
 
   componentDidMount() {
-    this.getPost()
+    this.getPage()
   }
 
   componentWillReceiveProps(nextProps) {
@@ -41,7 +42,7 @@ class PostView extends Component {
     }
   }
 
-  getPost = () => {
+  getPage = () => {
     this.props.effects.getPage(this.props.match.url.slice(1))
       .then(this.hashLinkScroll)
   }
@@ -60,6 +61,9 @@ class PostView extends Component {
   render() {
     return (
       <div style={{ padding: '10px' }}>
+        <Helmet>
+          <title>DanielFGray - {this.state.page.title}</title>
+        </Helmet>
         {this.state.page && <Page {...this.state.page} />}
         {this.props.state.postPending && <Spinner />}
       </div>
