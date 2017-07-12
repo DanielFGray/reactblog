@@ -4,18 +4,19 @@ import {
   countBy,
   filter,
   flatten,
-  get,
   identity,
   map,
   memoize,
   pipe,
   pluck,
+  prop,
   reverse,
   sortBy,
   toPairs,
   uniq,
+  values,
   zipObj,
-} from 'lodash/fp'
+} from 'ramda'
 
 const wrapWithPending = (pendingKey, cb) => (effects, ...a) =>
   effects.setFlag(pendingKey, true)
@@ -46,32 +47,34 @@ const Provider = provideState({
         .then(post => state => ({ ...state, post }))),
     getPosts: wrapWithPending('excerptsPending', () =>
       getFromAPI('index')
-        .then(res => res.pages)
-        .then(pipe(sortBy('date'), reverse))
+        .then(pipe(prop('content'), values, sortBy(prop('date')), reverse))
         .then(excerpts => state => ({ ...state, excerpts }))),
   },
   computed: {
     pages: pipe(
-      get('excerpts'),
+      prop('excerpts'),
       filter(x => x.layout !== 'post'),
       pluck('title'),
+      values,
     ),
     categories:
       pipe(
-        get('excerpts'),
+        prop('excerpts'),
         filter(x => x.layout === 'post'),
         pluck('category'),
+        values,
         uniq,
       ),
     tags:
       pipe(
-        get('excerpts'),
+        prop('excerpts'),
         pluck('tags'),
+        values,
         flatten,
         countBy(identity),
         toPairs,
         map(zipObj(['name', 'value'])),
-        sortBy('value'),
+        sortBy(prop('value')),
         reverse,
       ),
   },

@@ -113,8 +113,8 @@ const matter = require('gray-matter')
 
 const contentDir = `${__dirname}/content`
 
-const readFile = Promise.promisify(fs.readFile)
 const glob = globby(`${contentDir}/**/*.md`, { absolute: true })
+const readFile = Promise.promisify(fs.readFile)
 
 Rx.Observable.from(glob)
   .flatMap(x => x)
@@ -180,8 +180,8 @@ const contentDir = `${__dirname}/content`
 
 const merge = (...objects) => Object.assign({}, ...objects)
 
-const readFile = Promise.promisify(fs.readFile)
 const glob = globby(`${contentDir}/**/*.md`, { absolute: true })
+const readFile = Promise.promisify(fs.readFile)
 
 Rx.Observable.from(glob)
   .flatMap(x => x)
@@ -203,21 +203,18 @@ This has 90% of the functionality I wanted, all that is left is writing each ite
 I'm going to skim over the details, but this takes an object containing a `file` key, and writes to a directory called `public` and maintains the same path that the file came from. So if a file was in `content/posts/foo.md` it will be written to `public/posts/foo.json`.
 
 ``` javascript
+const mkdir = Promise.promisify(mkdir)
+const write = Promise.promisify(fs.writeFile)
 const writeFile = (object) => {
-  const filePieces = object.file
-    .split('/')
-    .filter(p => p.length > 0)
-  const outputDir = path.resolve(__dirname, 'public')
+  const filePieces = x.file.split('/').filter(p => p.length > 0)
+  const outputDir = path.resolve(__dirname, config.outputDir)
   const filePath = path.join(outputDir, ...filePieces)
   const [_, outBase, basename] = Array.from(filePath.match(/^(.+)\/([^/]+)$/))
-  return Promise.promisify(mkdirp)(outBase)
-    .then(() => {
-      const fileName = path.join(outBase, basename)
-      const write$ = fs.createWriteStream(`${fileName}.json`)
-      const output = JSON.stringify(merge(object, { file: basename }))
-      return write$.write(output)
-    })
-    .catch(console.log)
+  const fileName = path.join(outBase, basename).concat('.json')
+  const output = JSON.stringify(merge(x, { file: basename }))
+  return Observable.from(mkdir(outBase))
+    .flatMap(() => write(`${fileName}`, output))
+    .map(() => `${fileName.replace(__dirname, '.')} written`)
 }
 ```
 
@@ -236,24 +233,21 @@ const contentDir = `${__dirname}/content`
 
 const merge = (...objects) => Object.assign({}, ...objects)
 
-const readFile = Promise.promisify(fs.readFile)
 const glob = globby(`${contentDir}/**/*.md`, { absolute: true })
+const readFile = Promise.promisify(fs.readFile)
+const mkdir = Promise.promisify(mkdir)
+const write = Promise.promisify(fs.writeFile)
 
 const writeFile = (object) => {
-  const filePieces = object.file
-    .split('/')
-    .filter(p => p.length > 0)
-  const outputDir = path.resolve(__dirname, 'public')
+  const filePieces = x.file.split('/').filter(p => p.length > 0)
+  const outputDir = path.resolve(__dirname, config.outputDir)
   const filePath = path.join(outputDir, ...filePieces)
   const [_, outBase, basename] = Array.from(filePath.match(/^(.+)\/([^/]+)$/))
-  return Promise.promisify(mkdirp)(outBase)
-    .then(() => {
-      const fileName = path.join(outBase, basename)
-      const write$ = fs.createWriteStream(`${fileName}.json`)
-      const output = JSON.stringify(merge(object, { file: basename }))
-      return write$.write(output)
-    })
-    .catch(console.log)
+  const fileName = path.join(outBase, basename).concat('.json')
+  const output = JSON.stringify(merge(x, { file: basename }))
+  return Observable.from(mkdir(outBase))
+    .flatMap(() => write(`${fileName}`, output))
+    .map(() => `${fileName.replace(__dirname, '.')} written`)
 }
 
 Rx.Observable.from(glob)
@@ -266,7 +260,8 @@ Rx.Observable.from(glob)
       content: marked(content),
       date: (new Date(data.date)).getTime(),
     })))
-  .subscribe(writeFile)
+  .flatMap(writeFile)
+  .subscribe(console.log)
 ```
 
 This *works*, but I still wasn't happy. There were two key features I still wanted: an `index.json` that contained all the metadata of each post and a small excerpt, and syntax highlighting.
@@ -300,7 +295,8 @@ const index$ = file$
   .map(x => ({ content: x, file: 'index' }))
 
 Rx.Observable.merge(file$, index$)
-  .subscribe(writeFile)
+  .flatMap(writeFile)
+  .subscribe(console.log)
 ```
 
 # Syntax highlighting
@@ -343,7 +339,7 @@ marked.setOptions({
 })
 ```
 
-The whole script can be found here on GitLab: https://gitlab.com/danielfgray/reactblog/blob/master/build.js
+The whole script is a bit more fancy, and uses [chokidar][chokidar] to watch for file changes and re-build. It can be found on my GitLab: https://gitlab.com/danielfgray/reactblog/blob/master/build.js
 
 [hexo]: https://hexo.io
 [globby]: https://github.com/sindresorhus/globby
@@ -354,3 +350,4 @@ The whole script can be found here on GitLab: https://gitlab.com/danielfgray/rea
 [mkdirp]: https://github.com/substack/node-mkdirp
 [cheerio]: https://cheerio.js.org/
 [prism]: http://prismjs.com/
+[chokidar]: https://github.com/paulmillr/chokidar

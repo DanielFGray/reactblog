@@ -35,16 +35,16 @@ const contentDir = path.resolve(__dirname, config.contentDir)
 const fileGlob = `${config.contentDir}/**/*.md`
 
 const file$ =
-  ifElse(
-    commander.watch,
+  commander.watch
+  ?
     Observable.create((obs) => {
       const watcher = chokidar.watch(fileGlob)
       watcher.on('add', file => obs.next(file))
       watcher.on('change', file => obs.next(file))
-    }),
+    })
+  :
     Observable.from(globby(fileGlob))
-      .flatMap(identity),
-  )
+      .flatMap(identity)
 
 const convert$ = file$
   .map(file => path.resolve(file))
