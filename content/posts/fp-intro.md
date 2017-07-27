@@ -6,7 +6,7 @@ tags: [programming, javascript, php]
 date: 2017/1/10
 ---
 
-What's a functor anyway?
+It seems there's some confusion on why you might use functional programming methods like map/reduce/filter, and so I thought I'd write this to try and explain why they're useful.
 
 ---
 
@@ -33,24 +33,26 @@ Functional programming offers an alternative approach:
 function add($a, $b) {
   return $a + $b;
 }
-$sum = array_reduce($ints, add, 0);
-echo $sum; // -> 10
+
+function sum($a) {
+  return array_reduce($ints, add, 0); 
+} 
+
+echo sum($ints); // -> 10
 ```
 
-The idea of `reduce` is that it takes an iterable (usually an array) an initial value, performs some computation with it, and then returns a single value from those computations.
+The idea of `reduce` is that it takes some iterable (like an array), performs some computation with it, and then returns a single value from those computations.
 
 A simple implementation of `reduce()` might be something like this:
 
 ``` php
-function reduce($func, $arr, $initial) {
+function reduce($arr, $func, $initial) {
   $response = $initial;
   for($i = 0, $l = count($arr); $i < $l; ++$i) {
     $response = $func($response, $arr[$i]);
   }
   return $response;
 }
-
-reduce(function(a, b) { return a + b; }, [1, 2, 3, 4], 0) // -> 10
 ```
 
 The real magic is the fourth line: `$response = $func($response, $arr[$i], $i);`.
@@ -62,7 +64,7 @@ The real magic is the fourth line: `$response = $func($response, $arr[$i], $i);`
 Here's the same code in JavaScript:
 
 ``` javascript
-function reduce(func, arr, initial) {
+function reduce(arr, func, initial) {
   let response = initial;
   for (let i = 0, l = arr.length; i < l; ++i) {
     response = func(response, arr[i]);
@@ -70,10 +72,18 @@ function reduce(func, arr, initial) {
   return response;
 }
 
-reduce((a, b) => a + b, [1, 2, 3, 4], 0)  // -> 10
+function add(a, b) {
+  return a + b;
+}
+
+function sum(array) {
+  return reduce(array, add, 0);
+}
+
+sum([1, 2, 3, 4])  // -> 10
 ```
 
-A function that takes another function as an argument (or returns another function) is a called a *Higher-Order Function*. Reduce is a higher-order function that "folds" a list of values into a single value, by passing a callback function the previous value of 
+A function that takes another function as an argument (or returns another function) is a called a *Higher-Order Function*. Reduce is a higher-order function that "folds" a list of values into a single value.
 
 # Map
 
@@ -89,7 +99,7 @@ $squared = [];
 for($i = 0, $length = count($ints); $i < $length; ++$i) {
   $squared[] = $ints[$i] * $ints[$i];
 }
-echo join(', ', $ints); // -> 1, 4, 9, 16
+echo join(', ', $ints); // -> '1, 4, 9, 16'
 ```
 
 In functional programming, when you want to iterate over a set and transform it, you would use `map`.
@@ -98,12 +108,11 @@ In functional programming, when you want to iterate over a set and transform it,
 function square($n) {
   return $n * $n;
 }
-$ints = [1, 2, 3, 4];
-$squared = array_map(square, $ints);
-echo join(', ', $ints); // -> 1, 4, 9, 16
+
+array_map(square, [1, 2, 3, 4]); // -> 1, 4, 9, 16
 ```
 
-This is much tidier, in my opinion. When you see that big messy `for` loop, you have no idea what's going on until you fully read the whole thing and attempt to mentally parse it. When you see `map`, without reading anything but that word, you immediately know that you are creating a copy of an array and changing all the values based on a given function.
+This is much tidier, in my opinion. When you see that big messy `for` loop, you have no idea what's going on until you fully read the whole thing and attempt to mentally parse it. When you see `map`, without reading anything but that word, you immediately know that you are creating a new array with all of the values changed by a given function.
 
 You could implement `map` like the following:
 
@@ -148,20 +157,22 @@ Or, in JavaScript:
 ``` javascript
 // ES5
 function map(arr, fn) {
-  return reduce(arr, function(p, c) {
-    return p.concat(fn(c)), []);
+  return reduce(arr, function(prev, curr) {
+    return prev.concat(fn(curr)), []);
   }
 }
 
 // ES2015
 const map = (arr, fn) =>
-  reduce(arr, (p, c) =>
-    p.concat(fn(c)), []);
+  reduce(arr, (prev, curr) =>
+    prev.concat(fn(curr)), []);
 ```
 
 # Filter
 
-* TODO
+Filtering a list of values is perhaps the next useful task usually done with an array.
+
+We can implement a `filter` function that iterates over the whole list, and returns a new list of values that only match a given function:
 
 ``` php
 function filter($arr, $func) {
@@ -172,7 +183,15 @@ function filter($arr, $func) {
     return $previous;
   }, []);
 }
+
+function isEven($n) {
+  return $n % 2 == 0;
+}
+
+filter([1, 2, 3, 4, 5, 6], isEven) // -> [2, 4, 6]
 ```
+
+The filter function could be implemented in JavaScript like this:
 
 ``` javascript
 const filter = (array, callback) =>
@@ -183,7 +202,6 @@ const filter = (array, callback) =>
     array)
 ```
 
-# TODO: Terminology
+---
 
-* Reduce is aka *fold*, which means JavaScript arrays are *foldable*
-* arrays in JavaScript and PHP are *functors* because they are mappable
+I'm of the opinion unless you need to `break` inside a loop, most use-cases of `for` to iterate over an array can usually be replaced with `map`, `reduce`, or `filter`, and get huge gains in readability.
