@@ -9,7 +9,7 @@ class PostView extends Component {
   props: {
     state: {
       postPending?: boolean,
-      excerpts: Array<Object>,
+      excerpts: Object,
       post: Object,
     },
     effects: {
@@ -29,8 +29,7 @@ class PostView extends Component {
   }
 
   state = {
-    post: this.props.state.excerpts
-      .find(e => e.file === this.props.match.params.title),
+    post: this.props.state.excerpts[this.props.match.params.title],
   }
 
   componentDidMount() {
@@ -52,9 +51,10 @@ class PostView extends Component {
     const { hash } = window.location
     if (hash !== '') {
       setTimeout(() => {
-        const id = hash.replace('#', '')
-        const element = document.getElementById(id)
-        if (element) element.scrollIntoView()
+        const element = document.getElementById(hash.replace('#', ''))
+        if (element) {
+          element.scrollIntoView()
+        }
       }, 0)
     }
   }

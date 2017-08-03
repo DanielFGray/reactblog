@@ -2,6 +2,7 @@
 title: Projects
 date: false
 comments: false
+layout: page
 ---
 
 Here's a list of projects I've created.

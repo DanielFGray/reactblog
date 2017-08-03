@@ -5,15 +5,15 @@ const webpack = require('webpack')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
-const babelOpts = {
-  test: /\.jsx?$/,
-  exclude: /node_modules/,
-  use: [
-    'babel-loader',
-  ],
-}
-
-const cssOpts = [
+const rules = [
+  {
+    test: /\.jsx?$/,
+    exclude: /node_modules/,
+    use: [
+      'babel-loader',
+      'eslint-loader',
+    ],
+  },
   {
     test: /\.[sc]ss$/,
     exclude: /node_modules/,
@@ -76,10 +76,7 @@ module.exports = {
     path: path.resolve(__dirname, 'public'),
   },
   module: {
-    rules: [
-      babelOpts,
-      ...cssOpts,
-    ],
+    rules,
   },
   plugins,
   devServer: {

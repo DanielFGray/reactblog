@@ -55,7 +55,7 @@ function reduce($arr, $func, $initial) {
 }
 ```
 
-The real magic is the fourth line: `$response = $func($response, $arr[$i], $i);`.
+The real magic is the fourth line: `$response = $func($response, $arr[$i]);`.
 * At the beginning of the function, `$response` is initialized as a copy of the `$initial` argument.
 * After every iteration, `$response` is re-assigned with the value of calling `$func()`. This calls the variable as a function.
 * When it calls the function given to it, it sends the previous value of `$response` (since it has yet to actually be assigned) and the current element in the array as arguments to the given `$func` so they may be accessed inside of it.
@@ -204,4 +204,4 @@ const filter = (array, callback) =>
 
 ---
 
-I'm of the opinion unless you need to `break` inside a loop, most use-cases of `for` to iterate over an array can usually be replaced with `map`, `reduce`, or `filter`, and get huge gains in readability.
+I'm of the opinion unless you need to `break` or `continue` inside a loop, most use-cases of `for` to iterate over an array can usually be replaced with `map`, `reduce`, or `filter`, and get huge gains in readability.

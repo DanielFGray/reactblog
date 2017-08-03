@@ -30,6 +30,7 @@ class App extends Component {
   }
 
   render() {
+    const { pages } = this.props.state
     return (
       <Router>
         <div>
@@ -37,8 +38,7 @@ class App extends Component {
           <article className={style.content}>
             <Switch>
               <Route path="/" exact component={Home} />
-              {this.props.state.pages.map(e =>
-                <Route key={e.toLowerCase()} path={`/${e.toLowerCase()}`} exact component={Page} />)}
+              {pages.map(e => <Route key={e.toLowerCase()} path={`/${e.toLowerCase()}`} exact component={Page} />)}
               <Route path="/tags" exact component={Home} />
               <Route path="/tags/:tag" component={Tags} />
               <Route path="/:category" exact component={Categories} />

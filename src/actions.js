@@ -10,6 +10,7 @@ import {
   pipe,
   pluck,
   prop,
+  propEq,
   reverse,
   sortBy,
   toPairs,
@@ -32,35 +33,44 @@ const Provider = provideState({
   initialState: () => ({
     post: {},
     postPending: false,
-    excerpts: [],
+    excerpts: {},
     excerptsPending: false,
     page: {},
     pagePending: false,
   }),
   effects: {
-    setFlag: (effects, key, value) => state => ({ ...state, [key]: value }),
-    getPage: wrapWithPending('pagePending', (_, file) =>
-      getFromAPI(`${file}`)
-        .then(page => state => ({ ...state, page }))),
-    getPost: wrapWithPending('postPending', (_, file) =>
-      getFromAPI(`posts/${file}`)
-        .then(post => state => ({ ...state, post }))),
-    getPosts: wrapWithPending('excerptsPending', () =>
-      getFromAPI('index')
-        .then(pipe(prop('content'), values, sortBy(prop('date')), reverse))
-        .then(excerpts => state => ({ ...state, excerpts }))),
+    setFlag:
+      (effects, key, value) => state => ({ ...state, [key]: value }),
+    getPage:
+      wrapWithPending('pagePending', (_, file) =>
+        getFromAPI(`${file}`)
+          .then(page => state => ({ ...state, page }))),
+    getPost:
+      wrapWithPending('postPending', (_, file) =>
+        getFromAPI(`posts/${file}`)
+          .then(post => state => ({ ...state, post }))),
+    getPosts:
+      wrapWithPending('excerptsPending', () =>
+        getFromAPI('index')
+          .then(prop('content'))
+          .then(excerpts => state => ({ ...state, excerpts }))),
   },
   computed: {
-    pages: pipe(
-      prop('excerpts'),
-      filter(x => x.layout !== 'post'),
-      pluck('title'),
-      values,
-    ),
+    pages:
+      pipe(
+        prop('excerpts'),
+        values,
+        filter(propEq('layout', 'page')),
+        pluck('title'),
+        values,
+        sortBy('date'),
+        reverse,
+      ),
     categories:
       pipe(
         prop('excerpts'),
-        filter(x => x.layout === 'post'),
+        values,
+        filter(propEq('layout', 'post')),
         pluck('category'),
         values,
         uniq,
@@ -68,6 +78,7 @@ const Provider = provideState({
     tags:
       pipe(
         prop('excerpts'),
+        values,
         pluck('tags'),
         values,
         flatten,

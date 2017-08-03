@@ -9,7 +9,10 @@ const PostTags = ({ tags }: {
   tags: Array<string>,
 }) => (
   <ul className={style.postTagList}>
-    {tags.map(e => <li key={e}><Link to={`/tags/${e}`}>{e}</Link></li>)}
+    {tags.map(e => (
+      <li key={e}>
+        <Link to={`/tags/${e}`}>{e}</Link>
+      </li>))}
   </ul>
 )
 
