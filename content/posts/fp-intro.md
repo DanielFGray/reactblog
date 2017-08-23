@@ -205,3 +205,5 @@ const filter = (array, callback) =>
 ---
 
 I'm of the opinion unless you need to `break` or `continue` inside a loop, most use-cases of `for` to iterate over an array can usually be replaced with `map`, `reduce`, or `filter`, and get huge gains in readability.
+
+If you're interested in learning more about functional programming, check out my post on [currying and partial application](/computers/fp-curry-pa)
