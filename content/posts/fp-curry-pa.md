@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Functional programming: currying and partial application
+title: 'Functional Programming: currying and partial application'
 category: computers
 tags: [programming, javascript, fp]
 date: 2017/08/23
@@ -37,7 +37,7 @@ const add = a => b => a + b
 add(1)(2) //-> 3
 ```
 
-Taking a function that accepts multiple values, and transforming it to a 'stream' of functions that only accept a single argument is called *currying*.
+Taking a function that accepts multiple values, and transforming it to a 'stream' of functions that each only accept a single argument is called *currying*.
 
 ---
 
@@ -70,7 +70,7 @@ add(1, 2) //-> 3
 Why go through all this trouble? Well, imagine you want to write another function that increments a number by one:
 
 ``` javascript
-const inc = n => n + 1
+const inc = n => 1 + n
 inc(2) //-> 3
 ```
 
@@ -85,7 +85,7 @@ Taking a curried function and supplying less arguments than it expects is called
 
 ---
 
-In [a previous post](/computers/fp-intro) I talked about re-implementing `reduce`. Here's that `reduce` function, but wrapped with `curry`:
+In [a previous post](../fp-intro) I talked about re-implementing `reduce`. Here's that `reduce` function, but wrapped with `curry`:
 
 ``` javascript
 const reduce = curry((fn, init, arr) => {
@@ -97,11 +97,40 @@ const reduce = curry((fn, init, arr) => {
 })
 ```
 
-<small>*You might notice I have moved the position of the array argument to the end of the function's signature. This is specifically to allow the `fn` and `init` arguments to partially applied, so that the remaining argument is the actual data to be manipulated.*</small>
-
 With this, we can take our `add` function from earlier, and create a `sum` function that adds all the numbers in an array:
 
 ```
 const sum = reduce(add, 0)
 sum([1, 2, 3]) //-> 6
 ```
+
+---
+
+These are fairly boring things to curry, so I'll share a fun example of currying I used recently.
+
+I wanted to write a script that would send multiple requests to different sites, pulling in data from a lot of places, possibly sending multiple requests to each site, and all of the requests needed to have API keys with each call.
+
+There are tons of libraries that handle making requests but none of them have a curried version. Here's a thin wrapper around *[SuperAgent][superagent]*
+
+[superagent]: https://visionmedia.github.io/superagent
+
+``` javascript
+const request = curry((base, header, method, endpoint, data = {}) => {
+  return Promise.try(() => prop(method, {
+    post: superagent(method, `${base}${endpoint}`).set(header).send(data),
+    get: superagent(method, `${base}${endpoint}`).set(header).query(data),
+  }))
+  .then(prop(body))
+}
+const gitHub = request('https://api.github.com/', { Authorization: `token ${myGitHub.key}` })
+const gitLab = request('https://gitlab.com/api/v4/', { 'PRIVATE-TOKEN': myGitLab.key })
+
+gitHub('get', 'search/repositories', { q: `user:${myGitHub.user}` })
+  .then(console.log)
+gitLab('get', `users/${myGitLab.user}/projects`)
+  .then(console.log)
+```
+
+Instead of making separate functions that would almost be duplicates with only slight variations, I create one function and partially apply it with the base URL and Auth headers, so that I can re-use those for different end-points of the API and add arbitrary data to those.
+
+This version returns the body of the request as promise, the version I actually used returned an Observable so I could map and reduce over a merged stream of their responses.
