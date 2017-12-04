@@ -30,14 +30,14 @@ const add = function (a) {
 add(1)(2) //-> 3
 ```
 
-To make this a bit tidier, the same can be written with fat arrow functions:
+To make this a bit tidier, the same can be written with arrow functions:
 
 ``` javascript
 const add = a => b => a + b
 add(1)(2) //-> 3
 ```
 
-Taking a function that accepts multiple values, and transforming it to a 'stream' of functions that each only accept a single argument is called *currying*.
+Taking a function that accepts multiple values, and transforming it to a nested 'stream' of functions that each only accept a single argument is called *currying*.
 
 ---
 
@@ -115,13 +115,16 @@ There are tons of libraries that handle making requests but none of them have a 
 [superagent]: https://visionmedia.github.io/superagent
 
 ``` javascript
+const prop = curry((key, obj) => obj[key])
 const request = curry((base, header, method, endpoint, data = {}) => {
+  const req = superagent(method, `${base}${endpoint}`)
   return Promise.try(() => prop(method, {
-    post: superagent(method, `${base}${endpoint}`).set(header).send(data),
-    get: superagent(method, `${base}${endpoint}`).set(header).query(data),
+    post: req.set(header).send(data),
+    get: req.set(header).query(data),
   }))
-  .then(prop(body))
+    .then(prop(body))
 }
+
 const gitHub = request('https://api.github.com/', { Authorization: `token ${myGitHub.key}` })
 const gitLab = request('https://gitlab.com/api/v4/', { 'PRIVATE-TOKEN': myGitLab.key })
 
@@ -133,4 +136,4 @@ gitLab('get', `users/${myGitLab.user}/projects`)
 
 Instead of making separate functions that would almost be duplicates with only slight variations, I create one function and partially apply it with the base URL and Auth headers, so that I can re-use those for different end-points of the API and add arbitrary data to those.
 
-This version returns the body of the request as promise, the version I actually used returned an Observable so I could map and reduce over a merged stream of their responses.
+This version returns the body of the request as a Promise, the version I actually used returned an Observable so I could `map` and `reduce` over a merged stream of their responses.

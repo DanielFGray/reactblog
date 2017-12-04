@@ -6,7 +6,7 @@ tags: [programming, javascript, frp]
 date: 2017/06/18
 ---
 
-I had a fun time making my own static-site generator for this blog, and I thought this could serve as a practical introduction to Functional Reactive Programming (FRP).
+I had a fun time making my own static-site generator for a blog, and I thought this could serve as a practical introduction to Functional Reactive Programming (FRP).
 
 # Getting started
 
@@ -80,7 +80,7 @@ Rx.Observable.from(glob)
   .subscribe(console.log)
 ``` 
 
-The `flatMap` method will flatten/unwrap the `readFile` Observable and merge it into the parent Observable. The default behavior of `fs.readFile` is to return a `Buffer` object rather than a string. Fortunately this is easily fixed:
+The `flatMap` method will "unwrap" the `readFile` Observable and merge it into the stream. The default behavior of `fs.readFile` is to return a `Buffer` object rather than a string. Fortunately this is easily fixed:
 
 ``` javascript
 // ...
@@ -113,7 +113,6 @@ Throwing this into our stream looks like
 const fs = require('fs')
 const globby = require('globby')
 const Rx = require('rxjs')
-const Promise = require('bluebird')
 const matter = require('gray-matter')
 
 const contentDir = `${__dirname}/content`
@@ -134,13 +133,14 @@ But I wasn't entirely happy with the output here as it splits the front matter a
 Initially I wanted to use object spread, but that isn't currently available in Node, so I created a small little helper function that creates a new object from the objects given to it:
 
 ``` javascript
-const merge = (...objects) => Object.assign({}, ...objects)
+const merge = (...o) => o.reduce((p, c) => Object.assign(p, c), {})
 ```
 
 Which lets me create a new object containing just the data and content keys:
 
 ``` javascript
-const merge = (...objects) => Object.assign({}, ...objects)
+// ...
+const merge = (...o) => o.reduce((p, c) => Object.assign(p, c), {})
 Rx.Observable.from(glob)
   .flatMap(x => x)
   .flatMap(x => readFile(x))
@@ -153,7 +153,7 @@ Rx.Observable.from(glob)
 I also wanted to convert the date key in my front matter into a UNIX timestamp, and add the filename into the object so that it would be easy to determine the name of the file to writeFile to later. At this point I realized that the filename data was lost at this point in the stream, and I had to re-think the pattern I was using. I eventually solved both of these problems with the following:
 
 ``` javascript
-const merge = (...objects) => Object.assign({}, ...objects)
+// ...
 Rx.Observable.from(glob)
   .flatMap(x => x)
   .flatMap(file => readFile(file)
@@ -176,20 +176,7 @@ At this point it becomes pretty trivial to parse the markdown into actual html. 
 [marked]: https://github.com/chjj/marked
 
 ``` javascript
-const fs = require('fs')
-const globby = require('globby')
-const Rx = require('rxjs')
-const Promise = require('bluebird')
-const matter = require('gray-matter')
-const marked = require('marked')
-
-const contentDir = `${__dirname}/content`
-
-const merge = (...objects) => Object.assign({}, ...objects)
-
-const glob = globby(`${contentDir}/**/*.md`, { absolute: true })
-const readFile = Rx.Observable.bindNodeCallback(fs.readFile)
-
+// ...
 Rx.Observable.from(glob)
   .flatMap(x => x)
   .flatMap(file => readFile(file)
@@ -234,14 +221,13 @@ I'm also using [mkdirp][mkdirp] (and converting it to an Observable) to create d
 const fs = require('fs')
 const globby = require('globby')
 const Rx = require('rxjs')
-const Promise = require('bluebird')
 const matter = require('gray-matter')
 const marked = require('marked')
 const mkdirp = require('mkdirp')
 
 const contentDir = `${__dirname}/content`
 
-const merge = (...objects) => Object.assign({}, ...objects)
+const merge = (...o) => o.reduce((p, c) => Object.assign(p, c), {})
 
 const glob = globby(`${contentDir}/**/*.md`, { absolute: true })
 const readFile = Rx.Observable.bindNodeCallback(fs.readFile)
@@ -353,6 +339,6 @@ marked.setOptions({
 })
 ```
 
-The whole script is a bit more fancy, and uses [chokidar][chokidar] to watch for file changes and re-build. [It can be found on my GitLab](https://gitlab.com/danielfgray/reactblog/blob/master/build.js)
+The whole script is a bit more fancy, and uses [chokidar][chokidar] to watch for file changes and re-build. [It can be found on my GitLab](https://gitlab.com/danielfgray/reactblog/blob/master/build.js).
 
 [chokidar]: https://github.com/paulmillr/chokidar

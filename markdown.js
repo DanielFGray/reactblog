@@ -10,7 +10,7 @@ renderer.code = function renderCode(code, lang) {
   const c = this.options.highlight(code, lang)
   if (! lang) return `<pre class="language-">${c}</pre>`
   if (! prism.languages[lang]) {
-    const component = `prismjs/components/prism-${lang}.min.js`
+    const component = `prismjs/components/prism-${lang.toLowerCase()}.min.js`
     if (fs.statSync(path.join(__dirname, 'node_modules', component))) {
       // flow-disable-next-line
       require(component) // eslint-disable-line global-require,import/no-dynamic-require
