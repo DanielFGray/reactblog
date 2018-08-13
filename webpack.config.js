@@ -65,7 +65,7 @@ const plugins = {
   html: new HtmlWebpackPlugin({
     template: 'src/html.ejs',
     inject: false,
-    title: '[insert title]',
+    title: 'DanielFGray',
     appMountId,
     appBase: config.appBase.endsWith('/') ? config.appBase : `${config.appBase}/`,
     mobile: true,
