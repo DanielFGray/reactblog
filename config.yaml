@@ -1,4 +1,4 @@
 contentDir: content
 outputDir: public
 jsonOutput: public/api
-appBase: /
+appBase: /reactblog
