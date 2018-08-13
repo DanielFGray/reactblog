@@ -72,7 +72,7 @@ writeFile(file, JSON.stringify(data), 'utf8')
   .then(content => console.log(content))
 ```
 
-The flow is more linear, there's no nesting, instead we're just defining some functions for what to do at each step.
+The flow is more straight forward, there's no nesting, instead we're just defining some functions for what to do at each step.
 
 To take it one step further, let's get the file size after writing as well:
 
@@ -122,8 +122,8 @@ If this were just a one-off script for personal use, you could ignore the proble
 Here's one way to write that code using async/await:
 
 ``` javascript
-import fs from 'fs'
-import { promisify } = require('util')
+const fs = require('fs')
+const { promisify } = require('util')
 
 const writeFile = promisify(fs.writeFile)
 const readFile = promisify(fs.readFile)
@@ -132,10 +132,8 @@ const statFile = promisify(fs.stat)
 const file = './fileName'
 const data = {a:1}
 
-// i've ignored error handling for now
 const writeFiles = async (file, data) => {
   await writeFile(file, JSON.stringify(data), 'utf8')
-  console.log('done writing')
   const stats = await statFile(file)
   const size = stats.size
   const contents = await readFile(file, 'utf8')
@@ -144,7 +142,7 @@ const writeFiles = async (file, data) => {
 writeFiles(file, data)
 ```
 
-The difference is almost entirely just a case of wrapping the block in a function, removing the `Sync` suffix from each function, and prepending the `await` keyword to it.
+The difference from synchronous code using async/await is almost entirely just a case of wrapping the block in a function, removing the `Sync` suffix from each function, and prepending the `await` keyword to it.
 
 You can translate this back into promises:
 
@@ -175,7 +173,7 @@ To access previous values in the promise chain you have to create closures over 
 
 ---
 
-There are two possible ways to deal with error handling in async/await, one involves wrapping chunks if your code in try/catch blocks:
+There are two ways to deal with error handling in async/await, one involves wrapping chunks if your code in try/catch blocks:
 
 ``` javascript
 const writeFiles = async (file, data) => {
