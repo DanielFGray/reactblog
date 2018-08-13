@@ -2,7 +2,7 @@
 import React, { Component } from 'react'
 import { render } from 'react-dom'
 import {
-  BrowserRouter as Router,
+  HashRouter as Router,
   Route,
   Switch,
 } from 'react-router-dom'
