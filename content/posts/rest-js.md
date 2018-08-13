@@ -126,7 +126,7 @@ Rather than interacting with the database directly, we're going to use a query b
 
 [knex]: http://knexjs.org
 
-In a separate file, perhaps called `movies.js` save this:
+In a separate file, perhaps called `db.js` save this:
 
 ``` javascript
 const path = require('path')
@@ -142,26 +142,22 @@ This creates a knex instance, and uses a file called `data.sqlite3` in the same 
 Now let's define some sort of schema:
 
 ``` javascript
-knex.schema.createTableIfNotExists('movies', table => {
+const schema = knex.schema.createTableIfNotExists('movies', table => {
   table.increments('id').primary()
   table.string('title')
   table.integer('released')
-}).then()
+})
 ```
 
 This tells knex to look for a table called "movies" and create it if it doesn't exist. It creates three columns in the table: "id", "title", and "released".
-
-It's important to note that because of the nature of promises, knex would not execute this without the `.then()` method at the end. A promise can be initialized, but it won't resolve unless it has a reason to.
 
 ## Data methods
 
 Now that we have a database and a table, we need some methods to populate the table with data.
 
 ``` javascript
-function create(title, released) {
-  return knex('movies')
-    .insert({ title, released })
-}
+const create = (title, released) =>
+  knex('movies').insert({ title, released })
 ```
 
 This creates a function called `create` that accepts two parameters, `title` and `released`, which are purposely the same name as the field names. We then initialize a promise with knex to insert these, using [object shorthand notation][osn], which lets you use variable names for object keys.
@@ -171,10 +167,8 @@ This creates a function called `create` that accepts two parameters, `title` and
 Now that we can create movies, we need a way to list them:
 
 ``` javascript
-function list() {
-  return knex('movies')
-    .select('*')
-}
+const list = () =>
+  knex('movies').select('*')
 ```
 
 The functions here don't use `.then()` to resolve the promises because they will be used elsewhere. This file should just provide a small module that exposes a few functionalities to interact with data.
@@ -325,17 +319,16 @@ We only have the first two, so let's finish it up and add the others.
 Back in our `movies.js` let's add two more functions:
 
 ``` javascript
-function update({ id, title, released }) {
-  return knex('movies')
+const update = ({ id, title, released }) =>
+  knex('movies')
     .update({ title, released })
     .where({ id })
-}
 
-function del(id) {
-  return knex('movies')
+
+const del = id =>
+  knex('movies')
     .where({ id })
     .del()
-}
 ```
 
 The `update` method uses parameter destructuring, so rather than accepting 3 different arguments it accepts a single object, which we extract the keys from as their own variables. Both methods then use more object property shorthand, instead of the more verbose `where({ id: id })`.

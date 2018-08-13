@@ -32,7 +32,7 @@ class App extends Component {
   render() {
     const { pages } = this.props.state
     return (
-      <Router>
+      <Router basename={__APPBASE}>
         <div>
           <Nav />
           <article className={style.content}>

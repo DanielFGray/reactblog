@@ -16,7 +16,7 @@ Imagine you have an array of numbers, and you want to sum them.
 
 The common imperative approach is usually something like this:
 
-``` php
+``` PHP
 $ints = [1, 2, 3, 4];
 $sum = 0;
 for ($i = 0; $i < count($ints); $i++) {
@@ -29,23 +29,23 @@ While there's nothing particularly *wrong* with this (although I could nitpick a
 
 Functional programming offers an alternative approach:
 
-``` php
+``` PHP
 function add($a, $b) {
   return $a + $b;
 }
 
 function sum($a) {
-  return array_reduce($a, add, 0);
+  return array_reduce($ints, add, 0);
 }
 
-echo sum([1, 2, 3, 4]); // -> 10
+echo sum($ints); // -> 10
 ```
 
 The idea of `reduce` (aka fold, or fold-left) is that it takes some iterable (like an array), performs some computation with it, and then returns a single value from those computations.
 
 A simple implementation of `reduce()` might be something like this:
 
-``` php
+``` PHP
 function reduce($func, $initial, $arr) {
   $response = $initial;
   for($i = 0, $l = count($arr); $i < $l; ++$i) {
@@ -58,12 +58,12 @@ function reduce($func, $initial, $arr) {
 The real magic is the fourth line: `$response = $func($response, $arr[$i]);`.
 * At the beginning of the function, `$response` is initialized as a copy of the `$initial` argument.
 * Every iteration, `$response` is re-assigned with the value of calling `$func($response)`. This *calls* the variable as a function.
-* When it calls the function given to it, it sends the previous value of `$response` (or the initial value if it's the first iteration), and the current element in the array, as arguments to the given `$func` so they may be accessed inside it when it's called.
-* Then finally, the last `$response` value is returned.
+* When it calls the function given to it, it sends the previous value of `$response` (or the initial value if it's the first iteration), and the current element in the array, as arguments to the given `$func` so they may be accessed inside the given function when it's called.
+* Then finally, last `$response` is returned.
 
 Here's the same code in JavaScript:
 
-``` javascript
+``` JavaScript
 function reduce(func, initial, arr) {
   let response = initial
   for (let i = 0, l = arr.length; i < l; ++i) {
@@ -76,8 +76,8 @@ function add(a, b) {
   return a + b
 }
 
-function sum(a) {
-  return reduce(add, 0, a)
+function sum(array) {
+  return reduce(add, 0, array)
 }
 
 sum([1, 2, 3, 4])  // -> 10
@@ -94,13 +94,13 @@ Summing numbers is a pretty trivial thing, so how about something more practical
 [eloquent]: http://eloquentjavascript.net/
 [exercise]: http://eloquentjavascript.net/04_data.html
 
-``` javascript
+``` JavaScript
 const array = [1, 2, 3]
 ```
 
 becomes
 
-``` javascript
+``` JavaScript
 const nested = {
   value: 1,
   rest: {
@@ -115,17 +115,15 @@ const nested = {
 
 There are a number of ways to solve this (in fact, don't let this section be a spoiler, try and solve this on your own first), but here is my approach:
 
-``` javascript
+``` JavaScript
 [1, 2, 3]
-  .reduceRight(function(prev, cur) {
-    return {
-      value: cur,
-      rest: prev
-    }
-  }, null)
+  .reduceRight((rest, value) =>
+    ({ value, rest }), null)
 ```
 
 `reduceRight` works similar to reduce, except it starts at the end of the array, and works backwards.
+
+The first time it iterates
 
 ---
 
@@ -136,7 +134,7 @@ This means that `reduce` is a function with the signature  `(a b -> a) a [b] -> 
 
 I should note that these are *imperative* solutions, *recursive* solutions are more typical in functional approaches.
 
-``` javascript
+``` JavaScript
 function reduce (fn, i, l) {
   return l.length === 0
     ? i
@@ -152,7 +150,7 @@ What if you wanted to transform each element? Maybe you have an array of numbers
 
 The imperative approach (again in PHP) might be something like:
 
-``` php
+``` PHP
 $ints = [1, 2, 3, 4];
 $squared = [];
 for($i = 0, $length = count($ints); $i < $length; ++$i) {
@@ -163,7 +161,7 @@ echo join(', ', $ints); // -> '1, 4, 9, 16'
 
 In functional programming, when you want to iterate over a set and transform it, you would use `map`.
 
-``` php
+``` PHP
 function square($n) {
   return $n * $n;
 }
@@ -175,11 +173,11 @@ This is much tidier, in my opinion. When you see that big messy `for` loop, you 
 
 ---
 
-`map` has a type signature of `(a -> b) [a] -> [b]`, it's a function that receives a function of type `a` which returns a thing of type `b` when given a list of `a`, and then returns a list of `b`s.
+`map` has a type signature of `(a -> b) -> [a] -> [b]`, it's a function that receives a function of type `a` which returns a thing of type `b` when given a list of `a`, and then returns a list of `b`s.
 
 That `map` can return a list of a different type is a key insight. Another example of using `map` could be to take an array of objects, and return an array of strings:
 
-``` javascript
+``` JavaScript
 var o = [{a: 'foo'}, {a: 'bar'}]
 o.map(function(e) { return "a: '" + e.a + "'" })
 // -> ["a: 'foo'", "a: 'bar'"]
@@ -189,7 +187,7 @@ o.map(function(e) { return "a: '" + e.a + "'" })
 
 You could implement `map` like the following:
 
-``` php
+``` PHP
 function map($func, $arr) {
   $response = [];
   for ($i = 0, $l = count($response); $i < $l; ++$i) {
@@ -203,7 +201,7 @@ It follows much the same pattern as the `reduce` function. In fact, they're almo
 
 If you recall, `reduce` always returns a single value. Well, an array, although it contains many items, is itself a single value. What if you give `reduce` an empty array as the initial value, and add to that array instead?
 
-``` php
+``` PHP
 $ints = [1, 2, 3, 4];
 $squared = array_reduce($ints, function($previous, $current) {
   $previous[] = $current * $current;
@@ -216,7 +214,7 @@ It works just as expected!
 
 In fact, you can write `map` as just a wrapper around reduce:
 
-``` php
+``` PHP
 function map($func, $arr) {
   return reduce(function($previous, $current) use ($func) { // use ($variable) is needed because PHP has strange scoping rules
     $previous[] = $func($current);
@@ -227,7 +225,7 @@ function map($func, $arr) {
 
 Or, in JavaScript:
 
-``` javascript
+``` JavaScript
 // ES5
 function map(fn, a) {
   return reduce(function(prev, curr) {
@@ -244,13 +242,21 @@ const map = (fn, a) =>
   }), [], a)
 ```
 
+If your map function returns another array, you can even "un-nest" or flatten the arrays into a single array:
+
+``` JavaScript
+const flatMap = (fn, a) =>
+  reduce((p, c) => p.concat(c), [], a)
+```
+
+
 # Filter
 
 Filtering a list of values is another useful task to be done with an array.
 
 We can implement a `filter` function that iterates over the whole list, and returns a new list of values that only match a given function:
 
-``` php
+``` PHP
 function filter($func, $arr) {
   return reduce(function($prev, $curr) use ($func) {
     if ($func($curr)) {
@@ -267,15 +273,16 @@ function isEven($n) {
 filter(isEven, [1, 2, 3, 4, 5, 6]) // -> [2, 4, 6]
 ```
 
-The same thing in JavaScript, using arrow functions a ternary conditional:
+The same thing in JavaScript, but instead of pushing to the same initial array, `Array#concat` returns a copy of the previous array .
 
-``` javascript
+``` JavaScript
 const filter = (fn, a) =>
-  reduce((p, c) =>
-    fn(c) ? p.concat([c]) : p), [], a)
-
-const isEven = n => n % 2 === 0
-filter(isEven, [1, 2, 3, 4, 5, 6]) // -> [2, 4, 6]
+  reduce((p, c) => {
+    if (fn(c)) {
+      return p.concat(c)
+    }
+    return p
+  }), [], a)
 ```
 
 ---
@@ -284,7 +291,7 @@ I'm of the opinion unless you need to `break` or `continue` inside a loop, most 
 
 If you know that map operates on a function and an array, and you see the following, which one takes you longer to read and understand what it does?
 
-``` javascript
+``` JavaScript
 const items = [{
   foo: 'a',
   bar: 1,

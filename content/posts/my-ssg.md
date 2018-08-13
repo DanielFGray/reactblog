@@ -2,7 +2,7 @@
 layout: post
 title: "How I Made My Own Static-Site Generator"
 category: computers
-tags: [programming, javascript, frp]
+tags: [programming, javascript, frp, nodejs]
 date: 2017/06/18
 ---
 
@@ -113,6 +113,7 @@ Throwing this into our stream looks like
 const fs = require('fs')
 const globby = require('globby')
 const Rx = require('rxjs')
+const Promise = require('bluebird')
 const matter = require('gray-matter')
 
 const contentDir = `${__dirname}/content`
@@ -130,36 +131,28 @@ Rx.Observable.from(glob)
 
 But I wasn't entirely happy with the output here as it splits the front matter and content into separate objects and also retains the original content which I didn't care about that.
 
-Initially I wanted to use object spread, but that isn't currently available in Node, so I created a small little helper function that creates a new object from the objects given to it:
-
-``` javascript
-const merge = (...o) => o.reduce((p, c) => Object.assign(p, c), {})
-```
-
 Which lets me create a new object containing just the data and content keys:
 
 ``` javascript
-// ...
-const merge = (...o) => o.reduce((p, c) => Object.assign(p, c), {})
 Rx.Observable.from(glob)
   .flatMap(x => x)
   .flatMap(x => readFile(x))
   .map(x => x.toString())
   .map(x => matter(x))
-  .map(({ data, content }) => merge(data, { content }))
+  .map(({ data, content }) => ({ ...data, content }))
   .subscribe(console.log)
 ```
 
-I also wanted to convert the date key in my front matter into a UNIX timestamp, and add the filename into the object so that it would be easy to determine the name of the file to writeFile to later. At this point I realized that the filename data was lost at this point in the stream, and I had to re-think the pattern I was using. I eventually solved both of these problems with the following:
+I also wanted to convert the date key in my front matter into a UNIX timestamp, and add the filename into the object so that it would be easy to determine the name of the file to `writeFile` to later. At this point I realized that the filename data was lost at this point in the stream, and I had to re-think the pattern I was using. I eventually solved both of these problems with the following:
 
 ``` javascript
-// ...
 Rx.Observable.from(glob)
   .flatMap(x => x)
   .flatMap(file => readFile(file)
     .map(x => x.toString())
     .map(x => matter(x))
-    .map(({ data, content }) => merge(data, {
+    .map(({ data, content }) => ({
+      ...data, 
       file: file.replace(new RegExp(`^${contentDir}(.*).md$`), '$1'),
       content,
       date: (new Date(data.date)).getTime(),
@@ -176,13 +169,25 @@ At this point it becomes pretty trivial to parse the markdown into actual html. 
 [marked]: https://github.com/chjj/marked
 
 ``` javascript
-// ...
+const fs = require('fs')
+const globby = require('globby')
+const Rx = require('rxjs')
+const Promise = require('bluebird')
+const matter = require('gray-matter')
+const marked = require('marked')
+
+const contentDir = `${__dirname}/content`
+
+const glob = globby(`${contentDir}/**/*.md`, { absolute: true })
+const readFile = Rx.Observable.bindNodeCallback(fs.readFile)
+
 Rx.Observable.from(glob)
   .flatMap(x => x)
   .flatMap(file => readFile(file)
     .map(x => x.toString())
     .map(x => matter(x))
-    .map(({ data, content }) => merge(data, {
+    .map(({ data, content }) => ({
+      ...data, 
       file: file.replace(new RegExp(`^${contentDir}(.*).md$`), '$1'),
       content: marked(content),
       date: (new Date(data.date)).getTime(),
@@ -206,7 +211,7 @@ const write = (object) => {
   const filePath = path.join(outputDir, ...filePieces)
   const [_, outBase, basename] = Array.from(filePath.match(/^(.+)\/([^/]+)$/))
   const fileName = path.join(outBase, basename).concat('.json')
-  const output = JSON.stringify(merge(x, { file: basename }))
+  const output = JSON.stringify(({ ...x, file: basename }))
   return mkdir(outBase)
     .flatMap(() => writeFile(`${fileName}`, output))
     .map(() => `${fileName.replace(__dirname, '.')} written`)
@@ -221,13 +226,12 @@ I'm also using [mkdirp][mkdirp] (and converting it to an Observable) to create d
 const fs = require('fs')
 const globby = require('globby')
 const Rx = require('rxjs')
+const Promise = require('bluebird')
 const matter = require('gray-matter')
 const marked = require('marked')
 const mkdirp = require('mkdirp')
 
 const contentDir = `${__dirname}/content`
-
-const merge = (...o) => o.reduce((p, c) => Object.assign(p, c), {})
 
 const glob = globby(`${contentDir}/**/*.md`, { absolute: true })
 const readFile = Rx.Observable.bindNodeCallback(fs.readFile)
@@ -240,7 +244,7 @@ const write = (object) => {
   const filePath = path.join(outputDir, ...filePieces)
   const [_, outBase, basename] = Array.from(filePath.match(/^(.+)\/([^/]+)$/))
   const fileName = path.join(outBase, basename).concat('.json')
-  const output = JSON.stringify(merge(x, { file: basename }))
+  const output = JSON.stringify({ ...x, file: basename })
   return mkdir(outBase)
     .flatMap(() => writeFile(`${fileName}`, output))
     .map(() => `${fileName.replace(__dirname, '.')} written`)
@@ -251,7 +255,8 @@ Rx.Observable.from(glob)
   .flatMap(file => readFile(file)
     .map(x => x.toString())
     .map(x => matter(x))
-    .map(({ data, content }) => merge(data, {
+    .map(({ data, content }) => ({
+      ...data,
       file: file.replace(new RegExp(`^${contentDir}(.*).md$`), '$1'),
       content: marked(content),
       date: (new Date(data.date)).getTime(),
@@ -278,14 +283,16 @@ const file$ = Rx.Observable.from(glob)
   .flatMap(file => readFile(file)
     .map(x => x.toString())
     .map(x => matter(x))
-    .map(({ data, content }) => merge(data, {
+    .map(({ data, content }) => ({
+      ...data,
       file: file.replace(new RegExp(`^${contentDir}(.*).md$`), '$1'),
       content: marked(content),
       date: (new Date(data.date)).getTime(),
     })))
 
 const index$ = file$
-  .map(x => merge(x, {
+  .map(x => ({
+    ...x,
     content: cheerio(x.content).first('p').text(),
     file: x.file.split('/').slice(-1)[0],
   }))
@@ -339,6 +346,6 @@ marked.setOptions({
 })
 ```
 
-The whole script is a bit more fancy, and uses [chokidar][chokidar] to watch for file changes and re-build. [It can be found on my GitLab](https://gitlab.com/danielfgray/reactblog/blob/master/build.js).
+The whole script is a bit more fancy, and uses [chokidar][chokidar] to watch for file changes and re-build. It can be found on my GitLab: https://gitlab.com/danielfgray/reactblog/blob/master/build.js
 
 [chokidar]: https://github.com/paulmillr/chokidar
