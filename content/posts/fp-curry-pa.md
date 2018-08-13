@@ -108,13 +108,14 @@ sum([1, 2, 3]) //-> 6
 
 These are fairly boring things to curry, so I'll share a fun example of currying I used recently.
 
-I wanted to write a script that would send multiple requests to different sites, pulling in data from a lot of places, possibly sending multiple requests to each site, and all of the requests needed to have API keys with each call.
+I wanted to write a script that would send multiple requests to different sites, pulling in data from a lot of places, possibly sending muliple requests to each site, and all of the requests needed to have API keys with each call.
 
 There are tons of libraries that handle making requests but none of them have a curried version. Here's a thin wrapper around *[SuperAgent][superagent]*
 
 [superagent]: https://visionmedia.github.io/superagent
 
 ``` javascript
+const prop = curry((key, o) => o[key])
 const request = curry((base, header, method, endpoint, data = {}) => {
   return Promise.try(() => prop(method, {
     post: superagent(method, `${base}${endpoint}`).set(header).send(data),
@@ -132,5 +133,3 @@ gitLab('get', `users/${myGitLab.user}/projects`)
 ```
 
 Instead of making separate functions that would almost be duplicates with only slight variations, I create one function and partially apply it with the base URL and Auth headers, so that I can re-use those for different end-points of the API and add arbitrary data to those.
-
-This version returns the body of the request as promise, the version I actually used returned an Observable so I could map and reduce over a merged stream of their responses.

@@ -16,7 +16,7 @@ The only reason I've found to pay for GitHub's premium service is for private re
 
 I'll save the tin-foil hats and ethical arguments for another post, suffice it to say I just really prefer using software that I can hack on and third parties can audit.
 
-# Superior Continuous Integration
+# Continuous Integration
 
 This is what really sold me. I'd had an account on GitLab before, but I hadn't really used it until I learned this.
 

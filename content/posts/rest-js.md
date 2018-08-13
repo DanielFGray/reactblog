@@ -234,7 +234,7 @@ const bodyParser = require('body-parser')
 Then tell express to apply the middleware:
 
 ``` javascript
-app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.urlencoded({ extended: false }))
 ```
 
 Finally we can add the route, and our `POST` body data will be available as `req.body`:

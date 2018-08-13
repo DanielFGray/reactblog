@@ -152,8 +152,8 @@ The benefits of these really shine with *variadic* implementations, so you can p
 ``` javascript
 const id = (x) => x
 const _compose = (f, g) => (x) => f(g(x))
-const compose = (...fs) => fs.reduce(_compose, id)
-const pipe = (...fs) => fs.reduceRight(_compose, id)
+const compose = (...fs) => fs.reduceRight(_compose, id)
+const pipe = (...fs) => fs.reduce(_compose, id)
 
 const objOf = curry((k, o) => ({ [k]: o }))
 const tap = curry((f, v) => { f(v); return v })

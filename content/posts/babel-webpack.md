@@ -40,7 +40,7 @@ Create a simple file at `src/index.js`
 // src/index.js
 const $ = require('jquery')
 
-$('body').prepend('<h1>hello world</h1>')
+$('body').prepend('<h1>hello world</h1>')t
 ```
 
 Now use Webpack to compile it, and check the output
@@ -245,9 +245,9 @@ less public/main.bundle.js
 
 ### TODO
 * more recipes?
-* webpack-dev-server
+* webpack-dev-server/middleware
 * html-webpack-plugin
-* babel-node and compiling for node
+* babel-node and compiling for node 
 * vendor bundle splitting
 * css modules
 * postcss

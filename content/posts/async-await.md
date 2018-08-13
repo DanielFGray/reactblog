@@ -16,8 +16,8 @@ When Node.js was first introduced, it shipped a pattern of dealing with I/O that
 var fs = require('fs')
 
 var file = './fileName'
-
-fs.writeFile(file, JSON.stringfy({a:1}), 'utf8', function(e) {
+const data = {a: 1}
+fs.writeFile(file, JSON.stringify(), 'utf8', function(e) {
   if(e) { throw new Error('error writing file:', e) }
   console.log('done writing')
 })
@@ -39,7 +39,7 @@ var file = './fileName'
 
 var number = Math.random()
 
-fs.writeFile(file, JSON.stringfy({a:1}), 'utf8', function(e) {
+fs.writeFile(file, JSON.stringify({a:1}), 'utf8', function(e) {
   if(e) { throw new Error('error writing file:', e) }
   console.log('done writing')
   fs.readFile(file, 'utf8', function(e, content) {
@@ -53,7 +53,7 @@ If you imagine a series of many more asynchronous actions happening after each o
 
 # Promises
 
-Promises are one attempt to solve this problem. They provide a chain-able API whic
+Promises are one attempt to solve this problem. They provide a chainable API which makes it easy to describe a sequence of actions in a more linear manner (ie without all the nesting).
 
 ``` javascript
 const fs = require('fs')
@@ -63,8 +63,8 @@ const file = './fileName'
 
 const writeFile = promisify(fs.writeFile)
 const readFile = promisify(fs.readFile)
-
-writeFile(file, JSON.stringfy({a:1}), 'utf8')
+const data = {a: 1}
+writeFile(file, JSON.stringify(data), 'utf8')
   .catch(e => throw new Error('error writing file:', e))
   .then(() => console.log('done writing'))
   .then(() => readFile(file, 'utf8'))
@@ -86,7 +86,7 @@ const writeFile = promisify(fs.writeFile)
 const readFile = promisify(fs.readFile)
 const statFile = promisify(fs.stat)
 
-writeFile(file, JSON.stringfy({a:1}), 'utf8')
+writeFile(file, JSON.stringify({a:1}), 'utf8')
   .catch(e => throw new Error('error writing file:', e))
   .then(() => console.log('done writing'))
   .then(() => statFile(file))
@@ -107,7 +107,7 @@ var fs = require('fs')
 var file = './fileName'
 var data = {a:1}
 
-fs.writeFileSync(file, JSON.stringfy(data), 'utf8')
+fs.writeFileSync(file, JSON.stringify(data), 'utf8')
 console.log('done writing')
 var stats = fs.statSync(file)
 var size = stats.size
@@ -134,7 +134,7 @@ const data = {a:1}
 
 // i've ignored error handling for now
 const writeFiles = async (file, data) => {
-  await writeFile(file, JSON.stringfy(data), 'utf8')
+  await writeFile(file, JSON.stringify(data), 'utf8')
   console.log('done writing')
   const stats = await statFile(file)
   const size = stats.size
@@ -157,7 +157,7 @@ const readFile = promisify(fs.readFile)
 const statFile = promisify(fs.stat)
 
 const writeFile = (file, data) =>
-  writeFile(file, JSON.stringfy(data), 'utf8')
+  writeFile(file, JSON.stringify(data), 'utf8')
     .then(() => {
       console.log('done writing')
       return statFile(file)
@@ -175,12 +175,12 @@ To access previous values in the promise chain you have to create closures over 
 
 ---
 
-There are two possible ways to deal with error handling in async/await:
+There are two possible ways to deal with error handling in async/await, one involves wrapping chunks if your code in try/catch blocks:
 
 ``` javascript
 const writeFiles = async (file, data) => {
   try {
-    await writeFile(file, JSON.stringfy(data), 'utf8')
+    await writeFile(file, JSON.stringify(data), 'utf8')
   } catch (e) {
     throw new Error('error writing file:', e)
   }
@@ -204,7 +204,7 @@ But if you prefer you can still use `.catch()`:
 
 ``` javascript
 const writeFiles = async (file, data) => {
-  await writeFile(file, JSON.stringfy(data), 'utf8')
+  await writeFile(file, JSON.stringify(data), 'utf8')
     .catch(e => throw new Error('error writing file:', e))
   console.log('done writing')
   const stats = await statFile(file)
