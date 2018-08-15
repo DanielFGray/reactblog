@@ -11,11 +11,16 @@ const yaml = require('js-yaml')
 const cheerio = require('cheerio')
 const chokidar = require('chokidar')
 const pretty = require('pretty-bytes')
-const { match, equals, toString } = require('ramda')
+const { isEmpty, last, match, equals, toString } = require('ramda')
 const markdown = require('./markdown')
 
 commander.option('-w, --watch', 're-build on file changes')
 commander.parse(process.argv)
+
+const crash = e => {
+  if (e) console.error(e)
+  process.exit(1)
+}
 
 const id = x => x
 const merge = (...o) => o.reduce((p, c) => Object.assign(p, c), {})
@@ -26,9 +31,9 @@ const writeFile = Observable.bindNodeCallback(fs.writeFile)
 const mkdir = Observable.bindNodeCallback(mkdirp)
 
 const config = yaml.safeLoad(fs.readFileSync('config.yaml', 'utf8'))
+
 if (! config.contentDir || ! config.outputDir) {
-  console.error('contentDir and outputDir must be specified in config.yaml')
-  process.exit(1)
+  crash('contentDir and outputDir must be specified in config.yaml')
 }
 
 const contentDir = path.resolve(__dirname, config.contentDir)
@@ -48,7 +53,8 @@ const convert$ = file$
   .flatMap(fileName => readFile(fileName)
     .map(toString)
     .map(matter)
-    .map(({ data, content }) => merge(data, {
+    .map(({ data, content }) => ({
+      ...data,
       file: fileName.replace(new RegExp(`^${contentDir}(.*).md$`), '$1'),
       content: markdown(content),
       date: (new Date(data.date)).getTime(),
@@ -60,9 +66,11 @@ const meta$ = convert$
     content: cheerio(x.content).first('p').text(),
     file: x.file.split('/').slice(-1)[0],
   }))
-  .scan((p, c) => merge(p, { [c.file.replace(/\.md$/, '')]: c }), {})
+  .scan((p, c) => ({ ...p,  [c.file.replace(/\.md$/, '')]: c }), {})
   .map(content => ({ content, file: 'index' }))
-  .distinctUntilChanged(equals)
+  .bufferTime(100)
+  .filter(x => ! isEmpty(x))
+  .map(last)
 
 Observable.merge(convert$, meta$)
   .flatMap((x) => {
