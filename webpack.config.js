@@ -8,18 +8,26 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const yaml = require('js-yaml')
 
+let __INIT_DATA = {}
+try {
+  __INIT_DATA = require('./public/api/index.json')
+} catch (e) {
+  console.error('must run build.js first')
+}
+
 const nodeEnv = process.env.NODE_ENV || 'development'
 const devMode = nodeEnv.startsWith('dev')
 const appMountId = 'root'
 
 const config = yaml.safeLoad(fs.readFileSync('config.yaml', 'utf8'))
-
 const outputDir = path.resolve(path.join(__dirname, config.outputDir))
+
+const appBase = devMode ? '/' : config.appBase
 
 const constants = {
   __MOUNT: config.appMountId,
   __DEV: devMode,
-  __APPBASE: config.appBase,
+  __APPBASE: appBase,
 }
 
 const rules = [
@@ -67,8 +75,11 @@ const plugins = {
     inject: false,
     title: 'DanielFGray',
     appMountId,
-    appBase: config.appBase.endsWith('/') ? config.appBase : `${config.appBase}/`,
+    appBase: appBase.endsWith('/') ? appBase : `${appBase}/`,
     mobile: true,
+    window: {
+      __INIT_DATA,
+    }
   }),
 }
 

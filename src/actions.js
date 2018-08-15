@@ -33,7 +33,7 @@ const Provider = provideState({
   initialState: () => ({
     post: {},
     postPending: false,
-    excerpts: {},
+    excerpts: window.__INIT_DATA.content,
     excerptsPending: false,
     page: {},
     pagePending: false,
