@@ -1,17 +1,17 @@
 *
   box-sizing: border-box
 
-body
-  background: #f9f9f9
-  color: #111
-  font-family: sans
-  margin: 0
-  overflow-y: scroll
+:root
+  --spinner-radius: 30px
 
-code,
-pre
-  font-family: monospace !important
-  font-size: 1.1em !important
+body
+  overflow-y: scroll
+  font-size: 1.8rem
+  line-height: 1.618
+  margin: auto
+  color: #4a4a4a
+  background-color: #f9f9f9
+
 
 pre
   padding: 20px
@@ -21,11 +21,55 @@ a:link,
 a:visited
   text-decoration: none
 
-a:hover
+a:hover,
+a:active
   text-decoration: underline
 
+html
+  font-size: 62.5%
+  font-family: system-ui, serif
+
+@media (max-width: 684px)
+  body
+    font-size: 1.53rem
+
+@media (max-width: 382px)
+  body
+    font-size: 1.35rem
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6
+  line-height: 1.1
+  font-weight: 700
+  overflow-wrap: break-word
+  word-wrap: break-word
+  word-break: break-word
+  hyphens: auto
+
+h1
+  font-size: 2.35em
+
+h2
+  font-size: 2em
+
+h3
+  font-size: 1.75em
+
+h4
+  font-size: 1.5em
+
+h5
+  font-size: 1.25em
+
+h6
+  font-size: 1em
+
 .content
-  max-width: 800px
+  max-width: 48em
   margin: 0 auto
   line-height: 1.5
 
@@ -36,24 +80,3 @@ a:hover
     white-space: nowrap
     box-shadow: 0 1px 1px #0006
 
-@keyframes spin
-  0%
-    transform: rotate(0deg)
-
-  100%
-    transform: rotate(360deg)
-
-.spinner
-  display: flex
-  justify-content: space-around
-  align-items: center
-
-  > div
-    --radius: 30px
-    margin-top: 10px
-    border-radius: 50%
-    width: var(--radius)
-    height: var(--radius)
-    border: 0.25rem solid #3336
-    border-top-color: #333
-    animation: spin 1s infinite linear

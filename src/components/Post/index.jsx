@@ -2,8 +2,8 @@
 import React from 'react'
 import { Helmet } from 'react-helmet'
 
-import Excerpt from './Excerpt'
-import style from './Post.sss'
+import Excerpt from '../Excerpt'
+import style from './style.sss'
 
 const PostView = (props: Object) => (
   <article className={style.post}>
