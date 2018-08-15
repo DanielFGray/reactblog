@@ -8,18 +8,26 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const yaml = require('js-yaml')
 
+let __INIT_DATA = {}
+try {
+  __INIT_DATA = require('./public/api/index.json')
+} catch (e) {
+  console.error('must run build.js first')
+}
+
 const nodeEnv = process.env.NODE_ENV || 'development'
 const devMode = nodeEnv.startsWith('dev')
 const appMountId = 'root'
 
 const config = yaml.safeLoad(fs.readFileSync('config.yaml', 'utf8'))
-
 const outputDir = path.resolve(path.join(__dirname, config.outputDir))
+
+const appBase = devMode ? '/' : config.appBase
 
 const constants = {
   __MOUNT: config.appMountId,
   __DEV: devMode,
-  __APPBASE: config.appBase,
+  __APPBASE: appBase,
 }
 
 const rules = [
@@ -67,8 +75,11 @@ const plugins = {
     inject: false,
     title: 'DanielFGray',
     appMountId,
-    appBase: config.appBase.endsWith('/') ? config.appBase : `${config.appBase}/`,
+    appBase: appBase.endsWith('/') ? appBase : `${appBase}/`,
     mobile: true,
+    window: {
+      __INIT_DATA,
+    }
   }),
 }
 
@@ -99,6 +110,28 @@ const clientConfig = {
     new DefinePlugin(map(JSON.stringify, constants)),
   ],
   stats,
+}
+
+if (devMode) {
+  const webpackServeWaitpage = require('webpack-serve-waitpage')
+  const history = require('connect-history-api-fallback')
+  const convert = require('koa-connect')
+  clientConfig.devtool = 'inline-source-map'
+  clientConfig.serve = {
+    content: outputDir,
+    port: process.env.PORT || 8765,
+    host: process.env.HOST || 'localhost',
+    devMiddleware: {
+      stats,
+    },
+    add(app, middleware, options) {
+      const historyOptions = {
+        // ... see: https://github.com/bripkens/connect-history-api-fallback#options
+      }
+      app.use(convert(history(historyOptions)))
+      app.use(webpackServeWaitpage(options))
+    },
+  }
 }
 
 module.exports = [clientConfig]

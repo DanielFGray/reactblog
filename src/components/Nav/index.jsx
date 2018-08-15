@@ -3,7 +3,7 @@ import React from 'react'
 import { injectState } from 'freactal'
 import { NavLink } from 'react-router-dom'
 
-import style from './Nav.sss'
+import style from './style.sss'
 
 const titleCase = (str: string) =>
   str[0].toUpperCase().concat(str.slice(1).toLowerCase())

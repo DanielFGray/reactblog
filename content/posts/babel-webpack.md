@@ -40,7 +40,7 @@ Create a simple file at `src/index.js`
 // src/index.js
 const $ = require('jquery')
 
-$('body').prepend('<h1>hello world</h1>')t
+$('body').prepend('<h1>hello world</h1>')
 ```
 
 Now use Webpack to compile it, and check the output

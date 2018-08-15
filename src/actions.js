@@ -25,7 +25,7 @@ const wrapWithPending = (pendingKey, cb) => (effects, ...a) =>
     .then(value => effects.setFlag(pendingKey, false).then(() => value))
 
 const getFromAPI = memoize((route: string) =>
-  fetch(`${__APPBASE}/api/${route}.json`)
+  fetch(`${__APPBASE }api/${route}.json`)
     .then(x => x.json())
     .then(x => x))
 
@@ -33,7 +33,7 @@ const Provider = provideState({
   initialState: () => ({
     post: {},
     postPending: false,
-    excerpts: {},
+    excerpts: window.__INIT_DATA.content,
     excerptsPending: false,
     page: {},
     pagePending: false,

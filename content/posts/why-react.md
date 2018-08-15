@@ -101,4 +101,4 @@ To be fair, with React there's some pretty complex tooling involved if you want 
 
 If you've made it this far, you've learned pretty much everything about React except how to deal with state, so in parting I would like to offer a small example using React to query a JSON API and print the results.
 
-<iframe src="https://codesandbox.io/embed/NkB6R6O2L?module=wRo98&autoresize=1&hidenavigation=1" style="width:100vw; height:100vh; border:0; border-radius: 5px; overflow:hidden;" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+<iframe src="https://codesandbox.io/embed/NkB6R6O2L?module=wRo98&autoresize=1&hidenavigation=1" style="width:100%; height:90vh; border:0; border-radius: 5px; overflow:hidden;" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>

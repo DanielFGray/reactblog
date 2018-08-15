@@ -3,7 +3,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import ago from 's-ago'
 
-import style from './Post.sss'
+import style from './Post/style.sss'
 
 const PostTags = ({ tags }: {
   tags: Array<string>,
