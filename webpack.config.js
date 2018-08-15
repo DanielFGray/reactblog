@@ -112,4 +112,26 @@ const clientConfig = {
   stats,
 }
 
+if (devMode) {
+  const webpackServeWaitpage = require('webpack-serve-waitpage')
+  const history = require('connect-history-api-fallback')
+  const convert = require('koa-connect')
+  clientConfig.devtool = 'inline-source-map'
+  clientConfig.serve = {
+    content: outputDir,
+    port: process.env.PORT || 8765,
+    host: process.env.HOST || 'localhost',
+    devMiddleware: {
+      stats,
+    },
+    add(app, middleware, options) {
+      const historyOptions = {
+        // ... see: https://github.com/bripkens/connect-history-api-fallback#options
+      }
+      app.use(convert(history(historyOptions)))
+      app.use(webpackServeWaitpage(options))
+    },
+  }
+}
+
 module.exports = [clientConfig]

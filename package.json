@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon -w webpack.config.babel.js -w .babelrc -x 'webpack-dev-server --host 0.0.0.0 --progress'",
-    "build": "node build.js && NODE_ENV=production webpack -p",
-    "lint": "concurrently 'flow --quiet --color=always' 'eslint --ext=.js,.jsx src' 'stylelint src/**/*.{css,sss}' --prefix '{name}:' --names 'flow,eslint,stylelint' -c 'gray.reset' || true"
+    "start": "nodemon -w \"./{webpack.config.js,.babelrc,config.yaml}\" -x webpack-serve",
+    "build": "rm -fr public; node build.js && NODE_ENV=production webpack -p",
+    "lint": "concurrently --names='flow,eslint,stylelint' 'flow --quiet --color=always' 'eslint --cache --ext=.js,.jsx src' 'stylelint src/**/*.{css,sss}' --prefix '{name}:' -c 'gray.reset' || true"
   },
   "keywords": [],
   "author": "DanielFGray <DanielFGray@gmail.com>",
@@ -72,6 +72,7 @@
     "stylelint-config-standard": "^18.2.0",
     "sugarss": "^2.0.0",
     "webpack": "^4.16.5",
-    "webpack-cli": "^3.1.0"
+    "webpack-cli": "^3.1.0",
+    "webpack-serve": "^2.0.2"
   }
 }
